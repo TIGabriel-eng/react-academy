@@ -96,6 +96,7 @@ function HeroCarousel() {
 export function HomePage() {
   const navigate = useNavigate();
   const [cursos, setCursos] = useState<Curso[]>([]);
+  const [cursosLoaded, setCursosLoaded] = useState(false);
   const [recomendados, setRecomendados] = useState<Curso[]>([]);
   const [, setEventos] = useState<Evento[]>([]);
   const [trilhas, setTrilhas] = useState<Trilha[]>([]);
@@ -103,10 +104,21 @@ export function HomePage() {
   const [continuar, setContinuar] = useState<{ curso: Curso; progresso: number } | null>(null);
 
   useEffect(() => {
-    Promise.all([ApiService.getCursos(), ApiService.getCursosRecomendados(), ApiService.getEventos(), ApiService.getTrilhas(), ApiService.getDashboard()])
-      .then(([cursosData, recData, eventosData, trilhasData, dashData]) => {
+    // Carrega cursos PRIMEIRO (prioridade máxima)
+    ApiService.getCursos()
+      .then((cursosData) => {
         setCursos(cursosData || []);
-        setRecomendados(recData || []);
+        setCursosLoaded(true);
+      })
+      .catch(() => setCursosLoaded(true));
+
+    // Depois carrega o restante em paralelo
+    ApiService.getCursosRecomendados()
+      .then((recData) => setRecomendados(recData || []))
+      .catch(() => {});
+
+    ApiService.getEventos()
+      .then((eventosData) => {
         const ev = (eventosData || []) as Evento[];
         const now = new Date();
         const future = ev
@@ -126,9 +138,15 @@ export function HomePage() {
           return da.getTime() - db.getTime();
         });
         setEventos(future.slice(0, 5));
-        setTrilhas(trilhasData || []);
-        if (dashData) setMetricas(dashData.metricas);
       })
+      .catch(() => {});
+
+    ApiService.getTrilhas()
+      .then((trilhasData) => setTrilhas(trilhasData || []))
+      .catch(() => {});
+
+    ApiService.getDashboard()
+      .then((dashData) => { if (dashData) setMetricas(dashData.metricas); })
       .catch(() => {});
   }, []);
 
@@ -272,7 +290,15 @@ export function HomePage() {
       </div>
 
       <h1 className="section-tittle" style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: '24px', fontWeight: 700, color: 'var(--color-text-primary)', margin: '16px 0 0', padding: '16px 24px 8px', animation: 'fadeUp 1.5s ease both' }}>Curso Recomendado para você!</h1>
-      {recomendados.length > 0 && (
+      {!cursosLoaded ? (
+        <div className="cursos-grid" style={{ animation: 'fadeUp 1.5s ease both' }}>
+          <div className="curso-card">
+            <div className="curso-card__image" style={{ background: 'var(--color-bg-tertiary)', height: '180px', borderRadius: '12px', animation: 'pulse 1.5s infinite' }}></div>
+            <div style={{ height: '20px', background: 'var(--color-bg-tertiary)', margin: '12px', borderRadius: '6px', animation: 'pulse 1.5s infinite 0.2s' }}></div>
+            <div style={{ height: '14px', background: 'var(--color-bg-tertiary)', margin: '0 12px 12px', borderRadius: '6px', width: '60%', animation: 'pulse 1.5s infinite 0.4s' }}></div>
+          </div>
+        </div>
+      ) : recomendados.length > 0 && (
         <div className="cursos-grid" style={{ animation: 'fadeUp 1.5s ease both' }}>
           {recomendados.slice(0, 1).map((c) => {
             const slug = c.slug || c.id;
