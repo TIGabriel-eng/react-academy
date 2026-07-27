@@ -82,6 +82,19 @@ export interface Evento {
   descricao?: string;
 }
 
+export interface Live {
+  id: number;
+  titulo: string;
+  descricao: string;
+  imagem?: string;
+  url_externa: string;
+  data_hora: string;
+  ambiente: number | null;
+  ambiente_nome?: string;
+  status: 'agendada' | 'ao_vivo' | 'encerrada';
+  is_gratuito: boolean;
+}
+
 export interface Trilha {
   id: number;
   nome: string;

@@ -28,7 +28,7 @@ export function CursosConcluidosPage() {
       <h1 style={{ fontFamily: "var(--font-display)", fontSize: '1.3125rem', fontWeight: 800, marginBottom: '16px', color: '#ff9d00' }}>Cursos Concluídos</h1>
       {concluidos.length === 0 ? (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 12px' }}>
-          <img src={cursoNaoConcluidoImg} alt="Nenhum curso concluído" style={{ maxWidth: '140px', marginBottom: '16px' }} />
+          <img src={cursoNaoConcluidoImg} alt="Nenhum curso concluído" style={{ maxWidth: '70px', marginBottom: '16px' }} />
           <p style={{ color: 'var(--color-text-secondary)', fontSize: '1rem', fontWeight: 600, textAlign: 'center' }}>Você ainda não concluiu nenhum curso!</p>
         </div>
       ) : (

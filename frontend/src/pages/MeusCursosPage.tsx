@@ -24,9 +24,9 @@ export function MeusCursosPage() {
     <div style={{ padding: '12px 24px' }}>
       <h1 style={{ fontFamily: "var(--font-display)", fontSize: '1.3125rem', fontWeight: 800, marginBottom: '16px', color: '#ff9d00' }}>Meus Cursos</h1>
       {cursos.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '40px 12px' }}>
-          <img src={nenhumCursoImg} alt="Nenhum curso" style={{ maxWidth: '140px', marginBottom: '12px' }} />
-          <p style={{ color: 'var(--color-text-secondary)', fontSize: '1rem', fontWeight: 600 }}>Nenhum curso disponível!</p>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 12px' }}>
+          <img src={nenhumCursoImg} alt="Nenhum curso" style={{ maxWidth: '70px', marginBottom: '16px' }} />
+          <p style={{ color: 'var(--color-text-secondary)', fontSize: '1rem', fontWeight: 600, textAlign: 'center' }}>Nenhum curso disponível!</p>
         </div>
       ) : (
         <div className="cursos-grid">

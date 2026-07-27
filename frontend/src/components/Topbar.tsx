@@ -1,5 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AuthService } from '../services/auth';
+import { ApiService } from '../services/api';
 import { PLANO_MAP } from '../types';
 
 interface TopbarProps {
@@ -10,12 +12,15 @@ interface TopbarProps {
 }
 
 export function Topbar({ onMenuToggle, onSearchOpen, showSearch, showProfile }: TopbarProps) {
+  const navigate = useNavigate();
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
   const [userName, setUserName] = useState(AuthService.getName());
   const [avatar, setAvatar] = useState(AuthService.getAvatar());
   const [role, setRole] = useState(AuthService.getRole());
   const [plano, setPlano] = useState(AuthService.getPlanoNome());
   const [profileOpen, setProfileOpen] = useState(false);
+  const [liveActive, setLiveActive] = useState(false);
+  const [liveId, setLiveId] = useState<number | null>(null);
 
   useEffect(() => {
     if (theme === 'light') {
@@ -58,6 +63,20 @@ export function Topbar({ onMenuToggle, onSearchOpen, showSearch, showProfile }: 
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    const checkLives = () => {
+      ApiService.getLives().then((data: any) => {
+        const lives = (data || []) as any[];
+        const active = lives.find((l: any) => l.status === 'ao_vivo');
+        setLiveActive(!!active);
+        setLiveId(active ? active.id : null);
+      }).catch(() => {});
+    };
+    checkLives();
+    const interval = setInterval(checkLives, 15000);
+    return () => clearInterval(interval);
+  }, []);
+
   const handleLogout = () => {
     AuthService.logout();
     window.location.href = '/login';
@@ -78,9 +97,38 @@ export function Topbar({ onMenuToggle, onSearchOpen, showSearch, showProfile }: 
       )}
 
       <div className="topbar__actions">
-        <button className="topbar__icon-btn" onClick={toggleTheme} aria-label="Alternar tema" style={{ fontSize: '18px', cursor: 'pointer' }}>
-          {theme === 'light' ? '☀️' : '🌙'}
-        </button>
+        {liveActive && liveId && (
+          <button
+            className="topbar__icon-btn topbar__live-btn"
+            onClick={() => navigate('/live-area/' + liveId)}
+            aria-label="Live ao vivo"
+            title="Live ao vivo agora!"
+            style={{
+              background: 'linear-gradient(135deg, #dc2626, #ef4444)',
+              color: '#fff',
+              padding: '4px 12px',
+              borderRadius: 'var(--radius-full)',
+              fontWeight: 700,
+              fontSize: '0.75rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              animation: 'pulse 2s infinite',
+              border: 'none',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            <span style={{
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              background: '#fff',
+              display: 'inline-block',
+            }} />
+            AO VIVO
+          </button>
+        )}
         <button className="topbar__icon-btn" aria-label="Notificações">
           <i className="fa-regular fa-bell"></i>
           <span className="topbar__notif-dot"></span>

@@ -92,6 +92,15 @@ export const ApiService = {
     return this.get('/api/eventos/');
   },
 
+  // Lives
+  async getLives() {
+    return this.get('/api/lives/');
+  },
+
+  async getLive(id: number) {
+    return this.get('/api/lives/' + id + '/');
+  },
+
   // Trilhas
   async getTrilhas() {
     return this.get('/api/trilhas/');
