@@ -4,7 +4,6 @@ import { AuthService } from '../services/auth';
 import { ApiService } from '../services/api';
 import { getChildAcademies } from '../types';
 import type { Curso, Evento, Trilha, DashboardData } from '../types';
-import logoImage from '../assets/images/LOGO ORCOMA ACADEMY.png';
 import cursoNaoConcluidoImg from '../assets/images/curso-não-concluído.png';
 import banner1 from '../assets/images/banner1.png';
 import banner2 from '../assets/images/banner2.png';
@@ -278,7 +277,6 @@ export function HomePage() {
           {recomendados.slice(0, 1).map((c) => {
             const slug = c.slug || c.id;
             const thumb = c.thumbnail_url || '';
-            const videos = (c.videos || []).length;
             return (
               <div key={c.id} className="curso-card" onClick={() => navigate('/video-area/' + slug)}>
                 <div className="curso-card__image">

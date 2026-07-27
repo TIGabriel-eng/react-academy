@@ -34,8 +34,6 @@ function timeAgo(dateStr?: string): string {
 export function RatingSystem({ reviews, averageStars, totalReviews, onPostReview, isPosting }: RatingSystemProps) {
   const [composerRating, setComposerRating] = useState(0);
   const [composerText, setComposerText] = useState('');
-  const userName = AuthService.getName() || 'Usuário';
-  const userAvatar = AuthService.getAvatar();
 
   const handleSubmit = useCallback(() => {
     if (!composerText.trim() || composerRating === 0) return;

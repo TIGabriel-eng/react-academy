@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
-import { VideoBlockerOverlay, VideoShareBlocker, YouTubeButtonBlocker } from './VideoBlockerOverlay';
+import { VideoBlockerOverlay, VideoShareBlocker } from './VideoBlockerOverlay';
 
 interface VideoPlayerProps {
   videoUrl: string;

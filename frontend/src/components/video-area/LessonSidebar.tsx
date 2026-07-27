@@ -5,7 +5,6 @@ import type { Modulo, Material } from '../../types';
 import logoImage from '../../assets/images/LOGO ORCOMA ACADEMY.png';
 
 interface LessonSidebarProps {
-  cursoTitulo: string;
   modulos: Modulo[];
   moduloAtualIdx: number;
   aulaAtualIdx: number;
@@ -15,7 +14,6 @@ interface LessonSidebarProps {
 }
 
 export function LessonSidebar({
-  cursoTitulo,
   modulos,
   moduloAtualIdx,
   aulaAtualIdx,
