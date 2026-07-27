@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthService } from '../services/auth';
 import { ApiService } from '../services/api';
-import type { Curso, Evento, Live } from '../types';
+import type { Curso, Evento } from '../types';
 import { PLANO_MAP } from '../types';
 
 export function RightPanel() {
@@ -19,8 +19,6 @@ export function RightPanel() {
   const [events, setEvents] = useState<Evento[]>([]);
   const [cursos, setCursos] = useState<Curso[]>([]);
   const [matriculas, setMatriculas] = useState<any[]>([]);
-  const [lives, setLives] = useState<Live[]>([]);
-
   useEffect(() => {
     const updateUser = () => {
       setUserName(AuthService.getName());
@@ -34,11 +32,10 @@ export function RightPanel() {
   }, []);
 
   useEffect(() => {
-    Promise.all([ApiService.getCursos(), ApiService.getMinhasMatriculas(), ApiService.getEventos(), ApiService.getLives()])
-      .then(([cursosData, matriculasData, eventosData, livesData]) => {
+    Promise.all([ApiService.getCursos(), ApiService.getMinhasMatriculas(), ApiService.getEventos()])
+      .then(([cursosData, matriculasData, eventosData]) => {
         setCursos(cursosData || []);
         setMatriculas(matriculasData || []);
-        setLives((livesData || []) as Live[]);
         const eventos = (eventosData || []) as Evento[];
         const now = new Date();
         const future = eventos
@@ -192,79 +189,6 @@ export function RightPanel() {
             </div>
           </section>
 
-          <section className="events-sidebar lives-sidebar" id="livesSidebar">
-            <div className="events-header">
-              <h3>Orcoma Lives</h3>
-            </div>
-            <div className="events-body" id="livesBody">
-              <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem', margin: '0 0 12px', lineHeight: 1.5 }}>
-                Confira as nossas lives programadas para você!
-              </p>
-              {lives.length === 0 ? (
-                <div className="events-empty">
-                  <i className="ti ti-video-off"></i>
-                  <p>Nenhuma live agendada</p>
-                </div>
-              ) : (
-                <div className="events-list" id="livesList">
-                  {lives.map((lv) => {
-                    const parts = lv.data_hora.split(' ');
-                    const dp = parts[0]?.split('/') || [];
-                    const tp = parts[1]?.split(':') || [];
-                    const d = new Date(parseInt(dp[2] || '2024'), parseInt(dp[1] || '1') - 1, parseInt(dp[0] || '1'), parseInt(tp[0] || '0'), parseInt(tp[1] || '0'));
-                    const mes = meses[d.getMonth()];
-                    const dia = d.getDate();
-                    const hora = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-                    const isLive = lv.status === 'ao_vivo';
-                    return (
-                      <div
-                        key={lv.id}
-                        className={'events-list__item' + (isLive ? ' live-active' : '')}
-                        data-live-id={lv.id}
-                        onClick={() => navigate('/live-area/' + lv.id)}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        <div className="events-list__date" style={isLive ? { background: '#dc2626', color: '#fff' } : {}}>
-                          {isLive ? (
-                            <span style={{ fontSize: '0.7rem', fontWeight: 700 }}>AO<br />VIVO</span>
-                          ) : (
-                            <>
-                              <span className="events-list__month">{mes}</span>
-                              <span className="events-list__day">{dia}</span>
-                            </>
-                          )}
-                        </div>
-                        <div className="events-list__info">
-                          <div className="events-list__title">{lv.titulo}</div>
-                          <div className="events-list__time">
-                            {isLive ? (
-                              <span style={{ color: '#ef4444', fontWeight: 700 }}>
-                                🔴 Ao vivo agora
-                              </span>
-                            ) : (
-                              hora
-                            )}
-                          </div>
-                        </div>
-                        {isLive && (
-                          <span style={{
-                            width: '10px',
-                            height: '10px',
-                            borderRadius: '50%',
-                            background: '#ef4444',
-                            display: 'inline-block',
-                            animation: 'pulse 2s infinite',
-                            flexShrink: 0,
-                          }} />
-                        )}
-                        <i className="ti ti-chevron-right events-list__arrow"></i>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          </section>
         </>
       )}
     </aside>

@@ -15,7 +15,6 @@ import { ConfiguracoesPage } from './pages/ConfiguracoesPage';
 import { MeuPerfilPage } from './pages/MeuPerfilPage';
 import { CertificadosPage } from './pages/CertificadosPage';
 import { VideoAreaPage } from './pages/VideoAreaPage';
-import { LiveAreaPage } from './pages/LiveAreaPage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isLoggedIn = AuthService.isLoggedIn();
@@ -33,11 +32,6 @@ export default function App() {
         <Route path="/video-area/:cursoSlug" element={
           <ProtectedRoute>
             <VideoAreaPage />
-          </ProtectedRoute>
-        } />
-        <Route path="/live-area/:liveId" element={
-          <ProtectedRoute>
-            <LiveAreaPage />
           </ProtectedRoute>
         } />
         <Route path="/" element={
