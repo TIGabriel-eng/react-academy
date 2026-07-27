@@ -117,6 +117,13 @@ export function VideoPlayer({ videoUrl, title, cursoId, onProgress, onEnded }: V
   }, [onEnded]);
 
   useEffect(() => {
+    cursoJaConcluidoRef.current = false;
+    tempoAssistidoRef.current = 0;
+    ultimoTempoRef.current = 0;
+    isSeekingRef.current = false;
+  }, [videoUrl]);
+
+  useEffect(() => {
     if (videoType !== 'html5' || !videoRef.current) return;
     const vid = videoRef.current;
 
