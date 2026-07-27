@@ -52,7 +52,7 @@ export function LoginPage() {
           AuthService.setCurrentAcademy('team');
           navigate('/team');
         } else {
-          navigate('/meus-cursos');
+          navigate('/team');
         }
       } else {
         setError('Usuário ou senha inválidos.');

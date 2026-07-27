@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthService } from '../services/auth';
 import { ApiService } from '../services/api';
@@ -13,7 +13,7 @@ interface TopbarProps {
 
 export function Topbar({ onMenuToggle, onSearchOpen, showSearch, showProfile }: TopbarProps) {
   const navigate = useNavigate();
-  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
+  const [theme] = useState(localStorage.getItem('theme') || 'dark');
   const [userName, setUserName] = useState(AuthService.getName());
   const [avatar, setAvatar] = useState(AuthService.getAvatar());
   const [role, setRole] = useState(AuthService.getRole());
@@ -34,12 +34,6 @@ export function Topbar({ onMenuToggle, onSearchOpen, showSearch, showProfile }: 
       document.body.style.color = '';
       document.body.classList.remove('light-mode');
     }
-  }, [theme]);
-
-  const toggleTheme = useCallback(() => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
   }, [theme]);
 
   useEffect(() => {
