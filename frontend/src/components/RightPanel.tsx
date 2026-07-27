@@ -13,7 +13,6 @@ export function RightPanel() {
   const [userName, setUserName] = useState(AuthService.getName());
   const [avatar, setAvatar] = useState(AuthService.getAvatar());
   const [role, setRole] = useState(AuthService.getRole());
-  const [plano, setPlano] = useState(AuthService.getPlanoNome());
   const [profileOpen, setProfileOpen] = useState(false);
   const [progress, setProgress] = useState(0);
   const [events, setEvents] = useState<Evento[]>([]);
@@ -24,7 +23,6 @@ export function RightPanel() {
       setUserName(AuthService.getName());
       setAvatar(AuthService.getAvatar());
       setRole(AuthService.getRole());
-      setPlano(AuthService.getPlanoNome());
     };
     updateUser();
     const interval = setInterval(updateUser, 5000);
@@ -91,7 +89,7 @@ export function RightPanel() {
         <img src={avatar || '../assets/images/avatar-icon.jpg'} alt="Avatar" className="progress-sidebar__avatar" id="userAvatar" onError={(e) => { (e.target as HTMLImageElement).src = '../assets/images/avatar-icon.jpg'; }} style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover' }} />
         <div className="progress-sidebar__user-info">
           <span className="progress-sidebar__username">{userName}</span>
-          <span className={`progress-sidebar__plan pill-${role === 'admin' ? 'admin' : role === 'empresario' ? 'empresario' : role === 'visitor' ? 'visitor' : plano.toLowerCase().includes('premium') ? 'premium' : role === 'colaborador_orcoma' ? 'colaborador_orcoma' : 'cliente'}`} id="adminPill">
+          <span className={`progress-sidebar__plan pill-${role === 'admin' ? 'admin' : role === 'empresario' ? 'empresario' : role === 'visitor' ? 'visitor' : role === 'colaborador_orcoma' ? 'colaborador_orcoma' : 'cliente'}`} id="adminPill">
             {PLANO_MAP[role] || 'Visitante'}
           </span>
           {role === 'admin' && (

@@ -59,20 +59,10 @@ interface Habilidade {
   nome: string;
 }
 
-interface Assinatura {
-  plano_nome: string;
-  status: string;
-  data_contratacao: string;
-  data_expiracao: string;
-  dias_restantes: number;
-  percentual_usado: number;
-}
-
 export function MeuPerfilPage() {
   const [profile, setProfile] = useState<Profile>({ nome: '', email: '', role: 'visitor', empresa: '', plano_nome: '', sobre: '' });
   const [formacoes, setFormacoes] = useState<Formacao[]>([]);
   const [habilidades, setHabilidades] = useState<Habilidade[]>([]);
-  const [assinatura, setAssinatura] = useState<Assinatura | null>(null);
 
   const [sobreText, setSobreText] = useState('');
   const [composerOpen, setComposerOpen] = useState(false);
@@ -102,19 +92,15 @@ export function MeuPerfilPage() {
   const insigniaPermitidas: Record<string, { key: string; icon: string; name: string; desc: string }[]> = {
     admin: [
       { key: 'admin', icon: 'fa-shield-halved', name: 'Administrador', desc: 'Acesso total à plataforma com permissões de gerenciamento.' },
-      { key: 'premium', icon: 'fa-crown', name: 'Premium', desc: 'Acesso ilimitado a todos os cursos e funcionalidades exclusivas.' },
       { key: 'certificado', icon: 'fa-certificate', name: 'Certificado', desc: 'Concluiu um curso e recebeu um certificado.' },
     ],
     cliente_orcoma: [
-      { key: 'premium', icon: 'fa-crown', name: 'Premium', desc: 'Acesso ilimitado a todos os cursos e funcionalidades exclusivas.' },
       { key: 'certificado', icon: 'fa-certificate', name: 'Certificado', desc: 'Concluiu um curso e recebeu um certificado.' },
     ],
     colaborador_orcoma: [
-      { key: 'premium', icon: 'fa-crown', name: 'Premium', desc: 'Acesso ilimitado a todos os cursos e funcionalidades exclusivas.' },
       { key: 'certificado', icon: 'fa-certificate', name: 'Certificado', desc: 'Concluiu um curso e recebeu um certificado.' },
     ],
     gestor_orcoma: [
-      { key: 'premium', icon: 'fa-crown', name: 'Premium', desc: 'Acesso ilimitado a todos os cursos e funcionalidades exclusivas.' },
       { key: 'certificado', icon: 'fa-certificate', name: 'Certificado', desc: 'Concluiu um curso e recebeu um certificado.' },
     ],
     empresario: [
@@ -132,7 +118,7 @@ export function MeuPerfilPage() {
         role: data.role || AuthService.getRole(),
         empresa: data.perfil?.empresa || '',
         telefone: data.perfil?.telefone || '',
-        plano_nome: data.plano_nome || AuthService.getPlanoNome(),
+        plano_nome: data.plano_nome || '',
         sobre: data.perfil?.bio || '',
         avatar_url: data.avatar_url || data.perfil?.avatar || '',
         created_at: data.date_joined || null,
@@ -146,7 +132,7 @@ export function MeuPerfilPage() {
         email: AuthService.getEmail(),
         role: AuthService.getRole(),
         empresa: '',
-        plano_nome: AuthService.getPlanoNome(),
+        plano_nome: '',
         sobre: '',
       });
     }
@@ -156,9 +142,6 @@ export function MeuPerfilPage() {
     fetchProfile();
     ApiService.getFormacoes().then(setFormacoes).catch(() => {});
     ApiService.getHabilidades().then(setHabilidades).catch(() => {});
-    ApiService.getAssinaturas().then((items: Assinatura[]) => {
-      if (items?.length) setAssinatura(items[0]);
-    }).catch(() => {});
   }, [fetchProfile]);
 
   const createdDate = profile.created_at
@@ -392,61 +375,6 @@ export function MeuPerfilPage() {
             </div>
           </div>
 
-          {/* PLANO & ASSINATURA */}
-          <div className="settings-card">
-            <div className="settings-card__header">
-              <div className="settings-card__title-bar"></div>
-              <i className="fa-solid fa-crown"></i>
-              Plano & Assinatura
-            </div>
-            <div className="settings-card__body">
-              <div className="plan-row">
-                <div className="plan-row__info">
-                  <strong id="planName" className={`pill-${profile.role}`}>{profile.plano_nome || PLANO_MAP[profile.role] || 'Visitante'}</strong>
-                  <span id="planStatus">Plano ativo</span>
-                </div>
-                <span className="plan-badge plan-badge--active">Ativo</span>
-              </div>
-              {assinatura && (
-                <>
-                  <div className="assinatura-header-inline">
-                    <div className="assinatura-header-inline__left">
-                      <i className="fa-solid fa-calendar-check"></i>
-                      <span>Detalhes da assinatura</span>
-                    </div>
-                    <span className={`assinatura-card__status assinatura-card__status--${assinatura.status === 'ativa' ? 'ativa' : assinatura.dias_restantes <= 7 ? 'atencao' : 'expirada'}`}>
-                      {assinatura.status === 'ativa' ? 'Ativa' : assinatura.status === 'cancelada' ? 'Cancelado' : 'Vencido'}
-                    </span>
-                  </div>
-                  <div className="assinatura-dates-inline">
-                    <div className="assinatura-dates-inline__item">
-                      <i className="fa-regular fa-calendar"></i>
-                      <div className="assinatura-dates-inline__info">
-                        <span className="assinatura-dates-inline__label">Contratação</span>
-                        <span className="assinatura-dates-inline__value">{formatarDataBR(assinatura.data_contratacao)}</span>
-                      </div>
-                    </div>
-                    <div className="assinatura-dates-inline__item">
-                      <i className="fa-solid fa-calendar-xmark"></i>
-                      <div className="assinatura-dates-inline__info">
-                        <span className="assinatura-dates-inline__label">Expiração</span>
-                        <span className="assinatura-dates-inline__value">{formatarDataBR(assinatura.data_expiracao)}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="assinatura-progress-inline">
-                    <div className="assinatura-progress-inline__header">
-                      <span className="assinatura-progress-inline__label">Restam {assinatura.dias_restantes} dias</span>
-                      <span className="assinatura-progress-inline__pct">{assinatura.percentual_usado}%</span>
-                    </div>
-                    <div className="assinatura-progress-inline__bar">
-                      <div className={`assinatura-progress-inline__fill${assinatura.status !== 'ativa' ? ' assinatura-progress-inline__fill--expirada' : ''}`} style={{ width: assinatura.percentual_usado + '%' }}></div>
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
         </div>
       </div>
 
@@ -590,10 +518,4 @@ export function MeuPerfilPage() {
   );
 }
 
-function formatarDataBR(dateStr: string) {
-  if (!dateStr) return '';
-  const parts = dateStr.split('-');
-  if (parts.length !== 3) return dateStr;
-  const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-  return parts[2] + '/' + (meses[parseInt(parts[1], 10) - 1] || parts[1]) + '/' + parts[0];
-}
+

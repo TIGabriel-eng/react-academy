@@ -14,7 +14,6 @@ export function Topbar({ onMenuToggle, onSearchOpen, showSearch, showProfile }: 
   const [userName, setUserName] = useState(AuthService.getName());
   const [avatar, setAvatar] = useState(AuthService.getAvatar());
   const [role, setRole] = useState(AuthService.getRole());
-  const [plano, setPlano] = useState(AuthService.getPlanoNome());
   const [profileOpen, setProfileOpen] = useState(false);
 
   useEffect(() => {
@@ -47,7 +46,6 @@ export function Topbar({ onMenuToggle, onSearchOpen, showSearch, showProfile }: 
       setUserName(AuthService.getName());
       setAvatar(AuthService.getAvatar());
       setRole(AuthService.getRole());
-      setPlano(AuthService.getPlanoNome());
     }, 5000);
     return () => clearInterval(interval);
   }, []);
@@ -83,7 +81,7 @@ export function Topbar({ onMenuToggle, onSearchOpen, showSearch, showProfile }: 
               <img src={avatar || '../assets/images/avatar-icon.jpg'} alt="Avatar" style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--color-accent)' }} onError={(e) => { (e.target as HTMLImageElement).src = '../assets/images/avatar-icon.jpg'; }} />
               <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
                 <span className="progress-sidebar__username">{userName}</span>
-                <span className={`progress-sidebar__plan pill-${role === 'admin' ? 'admin' : role === 'empresario' ? 'empresario' : role === 'visitor' ? 'visitor' : plano.toLowerCase().includes('premium') ? 'premium' : role === 'colaborador_orcoma' ? 'colaborador_orcoma' : 'cliente'}`}>
+                <span className={`progress-sidebar__plan pill-${role === 'admin' ? 'admin' : role === 'empresario' ? 'empresario' : role === 'visitor' ? 'visitor' : role === 'colaborador_orcoma' ? 'colaborador_orcoma' : 'cliente'}`}>
                   {PLANO_MAP[role] || 'Visitante'}
                 </span>
               </div>

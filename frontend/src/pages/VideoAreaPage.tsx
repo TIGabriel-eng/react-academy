@@ -161,8 +161,11 @@ export function VideoAreaPage() {
 
     if (isComplete && !cursoJaConcluidoRef.current) {
       cursoJaConcluidoRef.current = true;
+      if (curso?.id) {
+        ApiService.concluirCurso(curso.id).catch(() => {});
+      }
     }
-  }, [modulos, completedLessons, salvarProgressoLocalStorage, showToastMsg, avancarParaProximaAula, activeLesson]);
+  }, [modulos, completedLessons, salvarProgressoLocalStorage, showToastMsg, avancarParaProximaAula, activeLesson, curso]);
 
   // Recalcular progresso quando completedLessons mudar
   useEffect(() => {

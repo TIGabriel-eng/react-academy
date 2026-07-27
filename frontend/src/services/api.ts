@@ -150,11 +150,6 @@ export const ApiService = {
     return this.del('/api/habilidades/' + id + '/');
   },
 
-  // Assinaturas
-  async getAssinaturas() {
-    return this.get('/api/assinaturas/');
-  },
-
   // Curso Módulos
   async getCursoModulos(slug: string) {
     return this.get('/api/cursos/' + slug + '/modulos/');

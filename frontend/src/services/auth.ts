@@ -16,7 +16,6 @@ export const AuthService = {
       email: localStorage.getItem('orcoma_user_email') || '',
       name: localStorage.getItem('orcoma_user_name') || '',
       avatar: localStorage.getItem('orcoma_user_avatar') || '',
-      plano_nome: localStorage.getItem('orcoma_plano_nome') || '',
     };
   },
 
@@ -36,10 +35,6 @@ export const AuthService = {
     return (auth?.getAvatar?.() ?? localStorage.getItem('orcoma_user_avatar')) || '';
   },
 
-  getPlanoNome(): string {
-    return (auth?.getPlanoNome?.() ?? localStorage.getItem('orcoma_plano_nome')) || '';
-  },
-
   getCurrentAcademy(): string {
     return (auth?.getCurrentAcademy?.() ?? localStorage.getItem('current_academy')) || 'Academy Business';
   },
@@ -57,7 +52,7 @@ export const AuthService = {
     if (auth?.logout) {
       auth.logout();
     } else {
-      const keys = ['access_token', 'refresh_token', 'orcoma_user_role', 'orcoma_user_email', 'orcoma_user_name', 'orcoma_user_avatar', 'orcoma_plano_nome'];
+      const keys = ['access_token', 'refresh_token', 'orcoma_user_role', 'orcoma_user_email', 'orcoma_user_name', 'orcoma_user_avatar'];
       keys.forEach(k => localStorage.removeItem(k));
     }
   },
@@ -72,7 +67,6 @@ export const AuthService = {
       if (userData.email) localStorage.setItem('orcoma_user_email', userData.email);
       if (userData.name) localStorage.setItem('orcoma_user_name', userData.name);
       if (userData.avatar) localStorage.setItem('orcoma_user_avatar', userData.avatar);
-      if (userData.plano_nome) localStorage.setItem('orcoma_plano_nome', userData.plano_nome);
     }
   },
 
