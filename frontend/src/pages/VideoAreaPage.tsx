@@ -19,6 +19,10 @@ interface ActiveLesson {
   modulo: Modulo;
 }
 
+function isPlayableMaterial(m: Material): boolean {
+  return !!(m.url_externa || (m.arquivo_url && (!m.modalidade || m.modalidade === 'video')));
+}
+
 export function VideoAreaPage() {
   const { cursoSlug } = useParams<{ cursoSlug: string }>();
   const navigate = useNavigate();
@@ -94,7 +98,7 @@ export function VideoAreaPage() {
           found = true;
           continue;
         }
-        if (found && (aulas[a].url_externa || aulas[a].arquivo_url)) {
+        if (found && isPlayableMaterial(aulas[a])) {
           return { moduloIdx: m, aulaIdx: a, material: aulas[a], modulo: modulos[m] };
         }
       }
@@ -120,15 +124,17 @@ export function VideoAreaPage() {
 
   const marcarAulaComoConcluida = useCallback((moduloIdx: number, aulaIdx: number) => {
     const key = moduloIdx + '-' + aulaIdx;
-    setCompletedLessons((prev) => {
-      if (prev.has(key)) return prev;
-      const next = new Set(prev);
-      next.add(key);
-      return next;
-    });
 
-    const totalLessons = modulos.reduce((acc, m) => acc + (m.materiais?.length || 0), 0);
-    const newCount = completedLessons.size + 1;
+    if (completedLessons.has(key)) return;
+
+    const nextCompleted = new Set(completedLessons);
+    nextCompleted.add(key);
+    setCompletedLessons(nextCompleted);
+
+    const totalLessons = modulos.reduce(
+      (acc, m) => acc + (m.materiais?.filter(isPlayableMaterial).length || 0), 0
+    );
+    const newCount = nextCompleted.size;
     const isComplete = totalLessons > 0 && newCount >= totalLessons;
     const pct = totalLessons > 0 ? Math.round((newCount / totalLessons) * 100) : 0;
 
@@ -136,10 +142,12 @@ export function VideoAreaPage() {
     for (let m = 0; m < modulos.length; m++) {
       const aulas = modulos[m].materiais || [];
       for (let a = 0; a < aulas.length; a++) {
-        allKeys.push(m + '-' + a);
+        if (isPlayableMaterial(aulas[a])) {
+          allKeys.push(m + '-' + a);
+        }
       }
     }
-    const aulasConcluidas = isComplete ? allKeys : [...completedLessons, key];
+    const aulasConcluidas = isComplete ? allKeys : [...nextCompleted];
 
     const dados = {
       concluido: isComplete,
@@ -162,14 +170,18 @@ export function VideoAreaPage() {
     if (isComplete && !cursoJaConcluidoRef.current) {
       cursoJaConcluidoRef.current = true;
       if (curso?.id) {
-        ApiService.concluirCurso(curso.id).catch(() => {});
+        ApiService.concluirCurso(curso.id).catch((err) => {
+          console.error('Erro ao concluir curso:', err);
+        });
       }
     }
   }, [modulos, completedLessons, salvarProgressoLocalStorage, showToastMsg, avancarParaProximaAula, activeLesson, curso]);
 
   // Recalcular progresso quando completedLessons mudar
   useEffect(() => {
-    const totalLessons = modulos.reduce((acc, m) => acc + (m.materiais?.length || 0), 0);
+    const totalLessons = modulos.reduce(
+      (acc, m) => acc + (m.materiais?.filter(isPlayableMaterial).length || 0), 0
+    );
     if (totalLessons > 0) {
       const pct = Math.round((completedLessons.size / totalLessons) * 100);
       setProgressoGeral(pct);
@@ -222,7 +234,7 @@ export function VideoAreaPage() {
           const { moduloIdx: mi, aulaIdx: ai } = progress.ultimo_video_assistido;
           if (modulosData[mi] && (modulosData[mi].materiais || [])[ai]) {
             const mat = (modulosData[mi].materiais || [])[ai];
-            if (mat.url_externa || mat.arquivo_url) {
+            if (isPlayableMaterial(mat)) {
               startLesson = { moduloIdx: mi, aulaIdx: ai, material: mat, modulo: modulosData[mi] };
             }
           }
@@ -231,7 +243,7 @@ export function VideoAreaPage() {
           for (let m = 0; m < modulosData.length; m++) {
             const aulas = modulosData[m].materiais || [];
             for (let a = 0; a < aulas.length; a++) {
-              if (aulas[a].url_externa || aulas[a].arquivo_url) {
+              if (isPlayableMaterial(aulas[a])) {
                 startLesson = { moduloIdx: m, aulaIdx: a, material: aulas[a], modulo: modulosData[m] };
                 break;
               }
@@ -284,14 +296,6 @@ export function VideoAreaPage() {
 
   const handleVideoEnded = useCallback(() => {
     if (!activeLesson) return;
-    const key = activeLesson.moduloIdx + '-' + activeLesson.aulaIdx;
-
-    // Chamar marcarAulaComoConcluida apenas se ainda não foi concluída
-    setCompletedLessons((prev) => {
-      if (prev.has(key)) return prev;
-      return prev;
-    });
-
     marcarAulaComoConcluida(activeLesson.moduloIdx, activeLesson.aulaIdx);
   }, [activeLesson, marcarAulaComoConcluida]);
 
