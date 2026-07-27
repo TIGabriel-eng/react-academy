@@ -5,6 +5,7 @@ import type { Modulo, Material } from '../../types';
 import logoImage from '../../assets/images/LOGO ORCOMA ACADEMY.png';
 
 interface LessonSidebarProps {
+  cursoTitulo: string;
   modulos: Modulo[];
   moduloAtualIdx: number;
   aulaAtualIdx: number;
@@ -14,6 +15,7 @@ interface LessonSidebarProps {
 }
 
 export function LessonSidebar({
+  cursoTitulo,
   modulos,
   moduloAtualIdx,
   aulaAtualIdx,
@@ -38,7 +40,7 @@ export function LessonSidebar({
       </button>
 
       <div className="va-sidebar__header">
-        <h2 className="va-sidebar__title">Aulas curso</h2>
+        <h2 className="va-sidebar__title">{cursoTitulo}</h2>
         <div className="va-sidebar__bar">
           <div className="va-sidebar__bar-fill" style={{ width: progressoGeral + '%' }} />
         </div>

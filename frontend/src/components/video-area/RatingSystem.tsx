@@ -1,5 +1,4 @@
 import { useState, useCallback } from 'react';
-import { AuthService } from '../../services/auth';
 import type { Review } from '../../types';
 
 interface RatingSystemProps {
