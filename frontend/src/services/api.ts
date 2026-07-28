@@ -1,12 +1,44 @@
 declare const API: any;
 
-const BASE_URL = (() => {
-  const hostname = window.location.hostname;
-  const isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '' || hostname === '[::1]';
-  return isLocal ? 'http://localhost:8000' : 'https://orcoma-academy-backend.onrender.com';
-})();
+const BASE_URL = import.meta.env.VITE_API_URL || 'https://orcoma-academy-backend.onrender.com';
 
-async function request(method: string, path: string, body?: any) {
+let isRefreshing = false;
+let failedQueue: Array<{ resolve: (token: string) => void; reject: (err: any) => void }> = [];
+
+function processQueue(error: any, token: string | null) {
+  failedQueue.forEach(({ resolve, reject }) => {
+    if (error) reject(error);
+    else resolve(token!);
+  });
+  failedQueue = [];
+}
+
+async function refreshAccessToken(): Promise<string> {
+  const refreshToken = localStorage.getItem('refresh_token');
+  if (!refreshToken) throw new Error('No refresh token');
+
+  const res = await fetch(BASE_URL + '/api/token/refresh/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refresh: refreshToken }),
+    credentials: 'same-origin',
+  });
+
+  if (!res.ok) throw new Error('Refresh failed');
+
+  const data = await res.json();
+  localStorage.setItem('access_token', data.access);
+  if (data.refresh) localStorage.setItem('refresh_token', data.refresh);
+  return data.access;
+}
+
+function forceLogout() {
+  const keys = ['access_token', 'refresh_token', 'orcoma_user_role', 'orcoma_user_email', 'orcoma_user_name', 'orcoma_user_avatar', 'orcoma_plano_nome'];
+  keys.forEach(k => localStorage.removeItem(k));
+  window.location.href = '/login';
+}
+
+async function request(method: string, path: string, body?: any, _retry = false): Promise<any> {
   if (typeof API !== 'undefined') {
     if (body !== undefined) {
       return API[method.toLowerCase()]?.(path, body) ?? API.get?.(path);
@@ -23,6 +55,41 @@ async function request(method: string, path: string, body?: any) {
   if (body !== undefined) options.body = JSON.stringify(body);
 
   const res = await fetch(url, options);
+
+  if (res.status === 401 && !_retry) {
+    if (isRefreshing) {
+      return new Promise<string>((resolve, reject) => {
+        failedQueue.push({ resolve, reject });
+      }).then((newToken) => {
+        headers['Authorization'] = 'Bearer ' + newToken;
+        return fetch(url, { ...options, headers }).then(r => r.json());
+      });
+    }
+
+    isRefreshing = true;
+    try {
+      const newToken = await refreshAccessToken();
+      processQueue(null, newToken);
+      headers['Authorization'] = 'Bearer ' + newToken;
+      const retryRes = await fetch(url, { ...options, headers });
+      let retryData;
+      try { retryData = await retryRes.json(); } catch { retryData = null; }
+      if (!retryRes.ok) {
+        const err = new Error(retryData?.detail || 'Erro na requisição');
+        (err as any).status = retryRes.status;
+        (err as any).data = retryData;
+        throw err;
+      }
+      return retryData;
+    } catch (err) {
+      processQueue(err, null);
+      forceLogout();
+      throw err;
+    } finally {
+      isRefreshing = false;
+    }
+  }
+
   let data;
   try { data = await res.json(); } catch { data = null; }
   if (!res.ok) {
@@ -195,8 +262,10 @@ export const ApiService = {
   },
 
   // User Stats
-  async getUserStats() {
-    return this.get('/api/user-stats/');
+  async getUserStats(academia?: string) {
+    let url = '/api/user-stats/';
+    if (academia) url += '?academia=' + encodeURIComponent(academia);
+    return this.get(url);
   },
 
   // Metas Semanais
@@ -206,5 +275,26 @@ export const ApiService = {
 
   async postMetaSemanal(dados: any) {
     return this.post('/api/metas-semanais/', dados);
+  },
+
+  // Notificações
+  async getNotificacoes() {
+    return this.get('/api/notificacoes/');
+  },
+
+  async getNotificacoesNaoLidasCount() {
+    return this.get('/api/notificacoes/nao-lidas/count/');
+  },
+
+  async marcarNotificacaoLida(id: number) {
+    return this.post('/api/notificacoes/marcar-lida/', { id });
+  },
+
+  async marcarTodasNotificacoesLidas() {
+    return this.post('/api/notificacoes/marcar-todas-lidas/');
+  },
+
+  async criarLembreteEventos() {
+    return this.post('/api/notificacoes/criar-lembrete-eventos/');
   },
 };

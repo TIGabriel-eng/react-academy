@@ -14,6 +14,7 @@ import { SuportePage } from './pages/SuportePage';
 import { ConfiguracoesPage } from './pages/ConfiguracoesPage';
 import { MeuPerfilPage } from './pages/MeuPerfilPage';
 import { CertificadosPage } from './pages/CertificadosPage';
+import { NotificacoesPage } from './pages/NotificacoesPage';
 import { VideoAreaPage } from './pages/VideoAreaPage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -52,6 +53,7 @@ export default function App() {
           <Route path="configuracoes" element={<ConfiguracoesPage />} />
           <Route path="meu-perfil" element={<MeuPerfilPage />} />
           <Route path="certificados" element={<CertificadosPage />} />
+          <Route path="notificacoes" element={<NotificacoesPage />} />
           <Route path="time" element={<AmbientePage />} />
           <Route path="orcomakers" element={<AmbientePage />} />
           <Route path="contabil" element={<AmbientePage />} />

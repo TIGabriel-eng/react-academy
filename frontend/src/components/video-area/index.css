@@ -399,42 +399,42 @@
 }
 
 .yt-blocker-share {
-  bottom: 12px;
-  right: 12px;
-  width: 56px;
-  height: 56px;
+  bottom: 6px;
+  right: 6px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
 }
 
 .yt-blocker-later {
-  bottom: 12px;
+  bottom: 6px;
   right: 80px;
-  width: 56px;
-  height: 56px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
 }
 
 .yt-blocker-youtube {
-  top: 12px;
-  right: 12px;
-  width: 56px;
-  height: 56px;
+  top: 6px;
+  right: 6px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
 }
 
 .yt-blocker-settings {
-  top: 12px;
+  top: 6px;
   right: 80px;
-  width: 56px;
-  height: 56px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
 }
 
 .yt-blocker-menu {
   bottom: 70px;
-  right: 12px;
-  width: 44px;
-  height: 44px;
+  right: 6px;
+  width: 70px;
+  height: 70px;
 }
 
 /* ── NO VIDEO ── */

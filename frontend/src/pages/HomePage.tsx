@@ -249,7 +249,7 @@ export function HomePage() {
         </div>
       ) : (
         <div style={{ textAlign: 'center', padding: '24px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-          <img src={cursoNaoConcluidoImg} alt="Nenhum curso em andamento" style={{ maxWidth: '100px', marginBottom: '10px' }} />
+          <img src={cursoNaoConcluidoImg} alt="Nenhum curso em andamento" style={{ maxWidth: '160px', marginBottom: '10px' }} />
           <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.95rem', fontWeight: 600, margin: 0 }}>Você não tem nenhum curso em andamento!</p>
         </div>
       )}
@@ -303,11 +303,14 @@ export function HomePage() {
           {recomendados.slice(0, 1).map((c) => {
             const slug = c.slug || c.id;
             const thumb = c.thumbnail_url || '';
+            const isConcluido = (c as any).status_matricula === 'concluido';
             return (
               <div key={c.id} className="curso-card" onClick={() => navigate('/video-area/' + slug)}>
                 <div className="curso-card__image">
                   <img src={thumb} alt={c.titulo} loading="lazy" />
-                  <span className="curso-card__status status-em-andamento">Recomendado</span>
+                  <span className={`curso-card__status ${isConcluido ? 'status-concluido' : 'status-em-andamento'}`}>
+                    {isConcluido ? 'Concluído' : 'Recomendado'}
+                  </span>
                 </div>
                 <div className="curso-card__name">{c.titulo}</div>
                 <div className="curso-card__divider"></div>

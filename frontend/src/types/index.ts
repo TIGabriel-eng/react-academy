@@ -80,12 +80,23 @@ export interface Evento {
   data: string;
   imagem_url?: string;
   descricao?: string;
+  url?: string;
 }
 
 export interface Trilha {
   id: number;
   nome: string;
   cursos?: number[];
+}
+
+export interface Notificacao {
+  id: number;
+  titulo: string;
+  mensagem: string;
+  tipo: 'boas_vindas' | 'curso_concluido' | 'evento';
+  lida: boolean;
+  link: string;
+  created_at: string;
 }
 
 export interface Matricula {
@@ -146,6 +157,7 @@ export const NAV_ITEMS = [
   { page: 'concluidos', icon: 'fa-solid fa-circle-check', label: 'Cursos concluídos', path: '/cursos-concluidos' },
   { page: 'trilhas', icon: 'fa-solid fa-route', label: 'Trilhas de aprendizagem', path: '/trilhas' },
   { divider: 'Geral' },
+  { page: 'notificacoes', icon: 'fa-regular fa-bell', label: 'Notificações', path: '/notificacoes' },
   { page: 'suporte', icon: 'fa-regular fa-circle-question', label: 'Suporte', path: '/suporte' },
   { page: 'config', icon: 'fa-solid fa-gear', label: 'Configurações', path: '/configuracoes' },
 ];

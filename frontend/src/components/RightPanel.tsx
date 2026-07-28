@@ -59,7 +59,7 @@ export function RightPanel() {
 
   useEffect(() => {
     if (!cursos.length) return;
-    const total = matriculas.length || 1;
+    const total = cursos.length || 1;
     const concluidas = matriculas.filter((m) => m.concluido).length;
     const percent = Math.round((concluidas / total) * 100);
     setProgress(percent);

@@ -166,54 +166,71 @@ export function EventosPage() {
                 <img
                   src={selected.imagem_url}
                   alt={selected.titulo}
-                  style={{ width: '100%', height: '260px', objectFit: 'cover', borderRadius: 'var(--radius-xl) var(--radius-xl) 0 0' }}
+                  style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: 'var(--radius-xl) var(--radius-xl) 0 0' }}
                 />
               )}
               <div style={{ padding: '28px' }}>
                 <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 700, marginBottom: '8px' }}>{selected.titulo || 'Evento'}</h2>
                 <p style={{ color: '#60a5fa', fontSize: '0.9rem', fontWeight: 600, marginBottom: '4px' }}>{formatFullDate(d)}</p>
                 <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.85rem', marginBottom: '16px' }}>em {dias} {dias === 1 ? 'dia' : 'dias'}</p>
+                {selected.url && (
+                  <p style={{ marginBottom: '16px' }}>
+                    <a 
+                      href={selected.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      style={{ 
+                        color: '#3b82f6', 
+                        fontWeight: 600, 
+                        textDecoration: 'underline',
+                        textUnderlineOffset: '2px',
+                        transition: 'color 0.2s, textDecorationColor 0.2s',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.color = '#2563eb';
+                        e.currentTarget.style.textDecorationColor = '#2563eb';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.color = '#3b82f6';
+                        e.currentTarget.style.textDecorationColor = '#3b82f6';
+                      }}
+                      onFocus={(e) => {
+                        e.currentTarget.style.outline = '2px solid #3b82f6';
+                        e.currentTarget.style.outlineOffset = '2px';
+                        e.currentTarget.style.borderRadius = '2px';
+                      }}
+                      onBlur={(e) => {
+                        e.currentTarget.style.outline = 'none';
+                      }}
+                    >
+                      {selected.url}
+                    </a>
+                  </p>
+                )}
                 {selected.descricao && (
                   <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '24px' }}>{selected.descricao}</p>
                 )}
-                <div style={{ display: 'flex', gap: '12px' }}>
-                  <a
-                    href={buildGoogleCalendarUrl(selected, d)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      padding: '10px 20px',
-                      background: 'linear-gradient(135deg, var(--color-accent-2), #2563eb)',
-                      color: '#fff',
-                      border: 'none',
-                      borderRadius: 'var(--radius-full)',
-                      fontWeight: 600,
-                      fontSize: '0.85rem',
-                      cursor: 'pointer',
-                      textDecoration: 'none',
-                    }}
-                  >
-                    <i className="fa-regular fa-calendar-plus"></i> Adicionar ao calendário
-                  </a>
-                  <button
-                    onClick={() => setSelected(null)}
-                    style={{
-                      padding: '10px 20px',
-                      background: 'transparent',
-                      color: 'var(--color-text-secondary)',
-                      border: '1px solid var(--color-border)',
-                      borderRadius: 'var(--radius-full)',
-                      fontWeight: 600,
-                      fontSize: '0.85rem',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    Fechar
-                  </button>
-                </div>
+                <a
+                  href={buildGoogleCalendarUrl(selected, d)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    padding: '10px 20px',
+                    background: 'linear-gradient(135deg, var(--color-accent-2), #2563eb)',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: 'var(--radius-full)',
+                    fontWeight: 600,
+                    fontSize: '0.85rem',
+                    cursor: 'pointer',
+                    textDecoration: 'none',
+                  }}
+                >
+                  <i className="fa-regular fa-calendar-plus"></i> Adicionar ao calendário
+                </a>
               </div>
             </div>
           </div>

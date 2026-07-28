@@ -28,21 +28,28 @@ export function CursosConcluidosPage() {
       <h1 style={{ fontFamily: "var(--font-display)", fontSize: '1.3125rem', fontWeight: 800, marginBottom: '16px', color: '#ff9d00' }}>Cursos Concluídos</h1>
       {concluidos.length === 0 ? (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 12px' }}>
-          <img src={cursoNaoConcluidoImg} alt="Nenhum curso concluído" style={{ maxWidth: '70px', marginBottom: '16px' }} />
+          <img src={cursoNaoConcluidoImg} alt="Nenhum curso concluído" style={{ maxWidth: '160px', marginBottom: '16px' }} />
           <p style={{ color: 'var(--color-text-secondary)', fontSize: '1rem', fontWeight: 600, textAlign: 'center' }}>Você ainda não concluiu nenhum curso!</p>
         </div>
       ) : (
-        <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
+        <div className="cursos-grid">
           {concluidos.map((c) => {
             const slug = c.slug || c.id;
             return (
-              <div key={c.id} className="course-card" onClick={() => navigate('/curso/' + slug)}>
-                <img src={c.thumbnail_url || ''} alt={c.titulo} className="curso-capa" />
-                <div className="course-card__body">
-                  <h3>{c.titulo}</h3>
-                  <span className="course-card__badge badge--concluido">Concluído</span>
+              <div key={c.id} className="curso-card" onClick={() => navigate('/curso/' + slug)}>
+                <div className="curso-card__image">
+                  <img src={c.thumbnail_url || ''} alt={c.titulo} loading="lazy" />
+                  <span className="curso-card__status status-concluido">Concluído</span>
                 </div>
-                <div className="course-card__progress">
+                <div className="curso-card__name">{c.titulo}</div>
+                <div className="curso-card__divider"></div>
+                <div className="curso-card__meta">
+                  <span className="concluido-badge">Concluído</span>
+                  <span className="certificado-link" onClick={(e) => { e.stopPropagation(); navigate('/certificados'); }}>
+                    <i className="fa-solid fa-file-pdf"></i> Emitir Certificado
+                  </span>
+                </div>
+                <div className="curso-card__progress">
                   <div className="progress__bar-track"><div className="progress__bar-fill" style={{ width: '100%' }}></div></div>
                   <span>100%</span>
                 </div>

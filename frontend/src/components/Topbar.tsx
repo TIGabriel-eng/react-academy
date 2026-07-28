@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { AuthService } from '../services/auth';
 import { PLANO_MAP } from '../types';
+import { ApiService } from '../services/api';
+import { NotificationPanel } from './NotificationPanel';
 
 interface TopbarProps {
   onMenuToggle: () => void;
@@ -15,6 +17,8 @@ export function Topbar({ onMenuToggle, onSearchOpen, showSearch, showProfile }: 
   const [avatar, setAvatar] = useState(AuthService.getAvatar());
   const [role, setRole] = useState(AuthService.getRole());
   const [profileOpen, setProfileOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifCount, setNotifCount] = useState(0);
 
   useEffect(() => {
     if (theme === 'light') {
@@ -50,6 +54,23 @@ export function Topbar({ onMenuToggle, onSearchOpen, showSearch, showProfile }: 
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    const fetchCount = () => {
+      ApiService.getNotificacoesNaoLidasCount()
+        .then((data) => setNotifCount(data?.count ?? 0))
+        .catch(() => {});
+    };
+    fetchCount();
+    const interval = setInterval(fetchCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (notifOpen) {
+      ApiService.criarLembreteEventos().catch(() => {});
+    }
+  }, [notifOpen]);
+
   const handleLogout = () => {
     AuthService.logout();
     window.location.href = '/login';
@@ -70,10 +91,13 @@ export function Topbar({ onMenuToggle, onSearchOpen, showSearch, showProfile }: 
       )}
 
       <div className="topbar__actions">
-        <button className="topbar__icon-btn" aria-label="Notificações">
-          <i className="fa-regular fa-bell"></i>
-          <span className="topbar__notif-dot"></span>
-        </button>
+        <div style={{ position: 'relative' }}>
+          <button className="topbar__icon-btn" aria-label="Notificações" onClick={() => setNotifOpen(!notifOpen)}>
+            <i className="fa-regular fa-bell"></i>
+            {notifCount > 0 && <span className="topbar__notif-dot" style={{ display: 'flex' }}></span>}
+          </button>
+          <NotificationPanel open={notifOpen} onClose={() => setNotifOpen(false)} />
+        </div>
 
         {showProfile && (
           <div className="topbar-profile" style={{ position: 'relative' }}>

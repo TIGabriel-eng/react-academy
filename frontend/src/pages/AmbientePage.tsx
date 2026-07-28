@@ -59,7 +59,7 @@ export function AmbientePage() {
   const [cursos, setCursos] = useState<Curso[]>([]);
   const [continuar, setContinuar] = useState<{ curso: Curso; progresso: number } | null>(null);
   const [metricas, setMetricas] = useState<DashboardData['metricas'] | null>(null);
-  const [userStats, setUserStats] = useState<{ horas_estudo: number; total_certificados: number; meta_semanal: any } | null>(null);
+  const [userStats, setUserStats] = useState<{ horas_estudo: number; total_certificados: number; total_concluidos: number; meta_semanal: any } | null>(null);
   const [metaModalOpen, setMetaModalOpen] = useState(false);
   const [selectedDays, setSelectedDays] = useState<boolean[]>([false, false, false, false, false, false, false]);
   const [hoursPerDay, setHoursPerDay] = useState<number>(1);
@@ -85,10 +85,10 @@ export function AmbientePage() {
         return now >= inicio && now <= fim && !m.concluida;
       });
       if (atual) {
-        setUserStats((prev) => ({
-          ...prev,
+        setUserStats((prev) => ({...prev,
           horas_estudo: prev?.horas_estudo ?? 0,
           total_certificados: prev?.total_certificados ?? 0,
+          total_concluidos: prev?.total_concluidos ?? 0,
           meta_semanal: atual,
         }));
       }
@@ -180,6 +180,7 @@ export function AmbientePage() {
         ...prev,
         horas_estudo: prev?.horas_estudo ?? 0,
         total_certificados: prev?.total_certificados ?? 0,
+        total_concluidos: prev?.total_concluidos ?? 0,
         meta_semanal: result,
       }));
     } catch {}
@@ -222,10 +223,10 @@ export function AmbientePage() {
           </div>
 
           <div className="hero-stat-card">
-            <div className="hero-stat-card__icon"><i className="fa-solid fa-award"></i></div>
+            <div className="hero-stat-card__icon"><i className="fa-solid fa-check-circle"></i></div>
             <div className="hero-stat-card__info">
-              <span className="hero-stat-card__label">Certificados</span>
-              <span className="hero-stat-card__value">{userStats?.total_certificados ?? 0}</span>
+              <span className="hero-stat-card__label">Cursos Concluídos</span>
+              <span className="hero-stat-card__value">{userStats?.total_concluidos ?? userStats?.total_certificados ?? 0}</span>
             </div>
           </div>
 
@@ -274,7 +275,7 @@ export function AmbientePage() {
         </div>
       ) : (
         <div style={{ textAlign: 'center', padding: '24px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-          <img src={cursoNaoConcluidoImg} alt="Nenhum curso em andamento" style={{ maxWidth: '100px', marginBottom: '10px' }} />
+          <img src={cursoNaoConcluidoImg} alt="Nenhum curso em andamento" style={{ maxWidth: '160px', marginBottom: '10px' }} />
           <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.95rem', fontWeight: 600, margin: 0 }}>Você não tem nenhum curso em andamento!</p>
         </div>
       )}

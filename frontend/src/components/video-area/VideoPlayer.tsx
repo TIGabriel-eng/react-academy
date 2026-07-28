@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
-import { VideoBlockerOverlay, VideoShareBlocker } from './VideoBlockerOverlay';
+import { VideoBlockerOverlay, VideoShareBlocker, YouTubeButtonBlocker } from './VideoBlockerOverlay';
 
 interface VideoPlayerProps {
   videoUrl: string;
@@ -580,6 +580,7 @@ export function VideoPlayer({ videoUrl, title, cursoId, onProgress, onEnded }: V
 
       <VideoBlockerOverlay />
       <VideoShareBlocker />
+      {videoType === 'youtube' && <YouTubeButtonBlocker />}
 
       {showCompletedOverlay && (
         <div className="va-completed-overlay">

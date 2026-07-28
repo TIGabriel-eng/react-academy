@@ -30,6 +30,19 @@ function normalizarNivel(nivel: string) {
   return mapa[nivel.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')] || '';
 }
 
+function formatarNivel(nivel: string): string {
+  const mapa: Record<string, string> = {
+    tecnico: 'Técnico',
+    tecnologo: 'Tecnólogo',
+    bacharel: 'Bacharel',
+    posgraduado: 'Pós-graduado',
+    mestre: 'Mestre',
+    doutor: 'Doutor',
+  };
+  const chave = nivel.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  return mapa[chave] || nivel;
+}
+
 interface Profile {
   id?: number;
   nome: string;
@@ -40,7 +53,7 @@ interface Profile {
   plano_nome: string;
   sobre: string;
   avatar_url?: string;
-  created_at?: string;
+  created_at?: string | null;
 }
 
 interface Formacao {
@@ -80,33 +93,11 @@ export function MeuPerfilPage() {
   const [confirmMessage, setConfirmMessage] = useState('');
   const confirmResolveRef = useRef<(v: boolean) => void>(() => {});
 
-  const [insigniaModalOpen, setInsigniaModalOpen] = useState(false);
-  const [insigniaData, setInsigniaData] = useState<{ key: string; icon: string; name: string; desc: string } | null>(null);
-
   const [certCount] = useState(0);
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
   const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
   const anoAtual = new Date().getFullYear();
-
-  const insigniaPermitidas: Record<string, { key: string; icon: string; name: string; desc: string }[]> = {
-    admin: [
-      { key: 'admin', icon: 'fa-shield-halved', name: 'Administrador', desc: 'Acesso total à plataforma com permissões de gerenciamento.' },
-      { key: 'certificado', icon: 'fa-certificate', name: 'Certificado', desc: 'Concluiu um curso e recebeu um certificado.' },
-    ],
-    cliente_orcoma: [
-      { key: 'certificado', icon: 'fa-certificate', name: 'Certificado', desc: 'Concluiu um curso e recebeu um certificado.' },
-    ],
-    colaborador_orcoma: [
-      { key: 'certificado', icon: 'fa-certificate', name: 'Certificado', desc: 'Concluiu um curso e recebeu um certificado.' },
-    ],
-    gestor_orcoma: [
-      { key: 'certificado', icon: 'fa-certificate', name: 'Certificado', desc: 'Concluiu um curso e recebeu um certificado.' },
-    ],
-    empresario: [
-      { key: 'certificado', icon: 'fa-certificate', name: 'Certificado', desc: 'Concluiu um curso e recebeu um certificado.' },
-    ],
-  };
 
   const fetchProfile = useCallback(async () => {
     try {
@@ -134,6 +125,7 @@ export function MeuPerfilPage() {
         empresa: '',
         plano_nome: '',
         sobre: '',
+        created_at: null,
       });
     }
   }, []);
@@ -144,11 +136,14 @@ export function MeuPerfilPage() {
     ApiService.getHabilidades().then(setHabilidades).catch(() => {});
   }, [fetchProfile]);
 
-  const createdDate = profile.created_at
-    ? new Date(profile.created_at).toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' })
-    : '—';
+  const createdDate = (() => {
+    if (!profile.created_at) return '—';
+    const data = new Date(profile.created_at);
+    if (isNaN(data.getTime())) return '—';
+    return data.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' });
+  })();
 
-  const formacaoLabel = formacoes.length > 0 ? formacoes[0].nivel + ' em ' + formacoes[0].area : '';
+  const formacaoLabel = formacoes.length > 0 ? formatarNivel(formacoes[0].nivel) + ' em ' + formacoes[0].area : '';
 
   const initials = profile.nome ? profile.nome.charAt(0).toUpperCase() : '?';
 
@@ -189,17 +184,24 @@ export function MeuPerfilPage() {
   const handleFormacaoSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const { instituicao, nivel, area, inicio_mes, inicio_ano } = formacaoForm;
-    if (!instituicao.trim() || !nivel || !area.trim() || !inicio_mes || !inicio_ano) return;
-    const dados = { ...formacaoForm };
-    if (formacaoEditId) {
-      await ApiService.patchFormacao(formacaoEditId, dados);
-    } else {
-      await ApiService.postFormacao(dados);
+    if (!instituicao.trim() || !nivel || !area.trim() || !inicio_mes || !inicio_ano) {
+      alert('Preencha todos os campos obrigatórios.');
+      return;
     }
-    setFormacaoModalOpen(false);
-    setFormacaoEditId(null);
-    setFormacaoForm({ instituicao: '', nivel: '', area: '', inicio_mes: '', inicio_ano: '', termino_mes: '', termino_ano: '' });
-    ApiService.getFormacoes().then(setFormacoes).catch(() => {});
+    try {
+      const dados = { ...formacaoForm };
+      if (formacaoEditId) {
+        await ApiService.patchFormacao(formacaoEditId, dados);
+      } else {
+        await ApiService.postFormacao(dados);
+      }
+      setFormacaoModalOpen(false);
+      setFormacaoEditId(null);
+      setFormacaoForm({ instituicao: '', nivel: '', area: '', inicio_mes: '', inicio_ano: '', termino_mes: '', termino_ano: '' });
+      ApiService.getFormacoes().then(setFormacoes).catch(() => {});
+    } catch {
+      alert('Erro ao salvar formação. Verifique os dados e tente novamente.');
+    }
   };
 
   const handleFormacaoEdit = async (id: number) => {
@@ -221,11 +223,18 @@ export function MeuPerfilPage() {
   const handleHabilidadeAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     const nome = habilidadeInput.trim();
-    if (!nome) return;
-    await ApiService.postHabilidade({ nome });
-    setHabilidadeInput('');
-    setHabilidadeModalOpen(false);
-    ApiService.getHabilidades().then(setHabilidades).catch(() => {});
+    if (!nome) {
+      alert('Digite o nome da habilidade.');
+      return;
+    }
+    try {
+      await ApiService.postHabilidade({ nome });
+      setHabilidadeInput('');
+      setHabilidadeModalOpen(false);
+      ApiService.getHabilidades().then(setHabilidades).catch(() => {});
+    } catch {
+      alert('Erro ao adicionar habilidade. Tente novamente.');
+    }
   };
 
   const handleHabilidadeDelete = async (id: number) => {
@@ -253,23 +262,6 @@ export function MeuPerfilPage() {
           <h2 className="profile-card__name">{profile.nome || 'Usuário'}</h2>
           <span className="profile-card__badge">{PLANO_MAP[profile.role] || profile.role}</span>
           {formacaoLabel && <span className="profile-card__formacao">{formacaoLabel}</span>}
-
-          <div className="profile-card__divider"></div>
-
-          <div className="profile-card__section">
-            <span className="profile-card__section-title">Insígnias</span>
-            <div className="insignias-grid">
-              {(insigniaPermitidas[profile.role] || []).map((ins) => (
-                <div key={ins.key} className="insignia-card" onClick={() => { setInsigniaData(ins); setInsigniaModalOpen(true); }}>
-                  <div className="insignia-card__icon"><i className={`fa-solid ${ins.icon}`}></i></div>
-                  <span className={`insignia-card__name pill-${ins.key}`}>{ins.name}</span>
-                </div>
-              ))}
-              {(!insigniaPermitidas[profile.role] || insigniaPermitidas[profile.role].length === 0) && (
-                <p style={{ color: '#64748b', fontSize: '13px', margin: 0 }}>Nenhuma insígnia</p>
-              )}
-            </div>
-          </div>
 
           <div className="profile-card__divider"></div>
 
@@ -312,7 +304,7 @@ export function MeuPerfilPage() {
                         <span className="formacao-item__curso">{escapeHtml(f.area)}</span>
                         <span className="formacao-item__instituicao">{escapeHtml(f.instituicao)}</span>
                         <span style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
-                          <span className={`formacao-item__badge formacao-item__badge--${cor}`}>{escapeHtml(f.nivel)}</span>
+                          <span className={`formacao-item__badge formacao-item__badge--${cor}`}>{formatarNivel(f.nivel)}</span>
                           <span className="formacao-item__periodo">{f.inicio_mes} {f.inicio_ano} a {f.termino_mes ? f.termino_mes + ' ' + f.termino_ano : 'Atual'}</span>
                         </span>
                       </div>
@@ -415,12 +407,12 @@ export function MeuPerfilPage() {
                 <label className="settings-field__label">Nível</label>
                 <select className="settings-field__input" value={formacaoForm.nivel} onChange={(e) => setFormacaoForm({ ...formacaoForm, nivel: e.target.value })} required>
                   <option value="">Selecione</option>
-                  <option value="Técnico">Técnico</option>
-                  <option value="Tecnólogo">Tecnólogo</option>
-                  <option value="Bacharel">Bacharel</option>
-                  <option value="Pós-graduado">Pós-graduado</option>
-                  <option value="Mestre">Mestre</option>
-                  <option value="Doutor">Doutor</option>
+                  <option value="tecnico">Técnico</option>
+                  <option value="tecnologo">Tecnólogo</option>
+                  <option value="bacharel">Bacharel</option>
+                  <option value="posgraduado">Pós-graduado</option>
+                  <option value="mestre">Mestre</option>
+                  <option value="doutor">Doutor</option>
                 </select>
               </div>
               <div className="settings-field">
@@ -502,18 +494,6 @@ export function MeuPerfilPage() {
         </div>
       )}
 
-      {/* INSÍGNIA MODAL */}
-      {insigniaModalOpen && insigniaData && (
-        <div className="insignia-modal is-open">
-          <div className="insignia-modal__overlay" onClick={() => setInsigniaModalOpen(false)}></div>
-          <div className="insignia-modal__content">
-            <button className="insignia-modal__close" onClick={() => setInsigniaModalOpen(false)}><i className="fa-solid fa-xmark"></i></button>
-            <div className="insignia-modal__icon"><i className={`fa-solid ${insigniaData.icon}`}></i></div>
-            <h3 className={`insignia-modal__name pill-${insigniaData.key}`}>{insigniaData.name}</h3>
-            <p className="insignia-modal__desc">{insigniaData.desc}</p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

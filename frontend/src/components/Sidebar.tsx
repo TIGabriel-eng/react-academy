@@ -56,6 +56,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       'meu-perfil': '/meu-perfil',
       cursos: '/meus-cursos',
       eventos: '/eventos',
+      notificacoes: '/notificacoes',
       continuar: '/continuar-assistindo',
       concluidos: '/cursos-concluidos',
       certificados: '/certificados',
