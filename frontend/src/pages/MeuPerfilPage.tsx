@@ -30,6 +30,23 @@ function normalizarNivel(nivel: string) {
   return mapa[nivel.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')] || '';
 }
 
+function formatarCNPJ(valor: string): string {
+  const digits = valor.replace(/\D/g, '').slice(0, 14);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 6) return `${digits.slice(0, 2)}.${digits.slice(2)}`;
+  if (digits.length <= 10) return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5)}`;
+  if (digits.length <= 12) return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5, 8)}/${digits.slice(8)}`;
+  return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5, 8)}/${digits.slice(8, 12)}-${digits.slice(12)}`;
+}
+
+function formatarCPF(valor: string): string {
+  const digits = valor.replace(/\D/g, '').slice(0, 11);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
+  if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+}
+
 function formatarNivel(nivel: string): string {
   const mapa: Record<string, string> = {
     tecnico: 'Técnico',
@@ -54,6 +71,10 @@ interface Profile {
   sobre: string;
   avatar_url?: string;
   created_at?: string | null;
+  cpf?: string;
+  cnpj?: string;
+  first_name?: string;
+  last_name?: string;
 }
 
 interface Formacao {
@@ -93,6 +114,10 @@ export function MeuPerfilPage() {
   const [confirmMessage, setConfirmMessage] = useState('');
   const confirmResolveRef = useRef<(v: boolean) => void>(() => {});
 
+  const [dadosPessoaisEditando, setDadosPessoaisEditando] = useState(false);
+  const [dadosPessoaisForm, setDadosPessoaisForm] = useState({ first_name: '', last_name: '', cpf: '', cnpj: '' });
+  const [dadosPessoaisSalvando, setDadosPessoaisSalvando] = useState(false);
+
   const [certCount] = useState(0);
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
@@ -113,6 +138,10 @@ export function MeuPerfilPage() {
         sobre: data.perfil?.bio || '',
         avatar_url: data.avatar_url || data.perfil?.avatar || '',
         created_at: data.date_joined || null,
+        cpf: data.cpf || '',
+        cnpj: data.cnpj || '',
+        first_name: data.first_name || '',
+        last_name: data.last_name || '',
       };
       setProfile(p);
       setSobreText(p.sobre);
@@ -242,6 +271,42 @@ export function MeuPerfilPage() {
     ApiService.getHabilidades().then(setHabilidades).catch(() => {});
   };
 
+  const iniciarEdicaoDadosPessoais = () => {
+    setDadosPessoaisForm({
+      first_name: profile.first_name || '',
+      last_name: profile.last_name || '',
+      cpf: profile.cpf || '',
+      cnpj: profile.cnpj || '',
+    });
+    setDadosPessoaisEditando(true);
+  };
+
+  const handleDadosPessoaisSalvar = async () => {
+    setDadosPessoaisSalvando(true);
+    try {
+      await ApiService.patchMe({
+        first_name: dadosPessoaisForm.first_name,
+        last_name: dadosPessoaisForm.last_name,
+        cpf: dadosPessoaisForm.cpf,
+        cnpj: dadosPessoaisForm.cnpj,
+      });
+      setProfile((prev) => ({
+        ...prev,
+        first_name: dadosPessoaisForm.first_name,
+        last_name: dadosPessoaisForm.last_name,
+        cpf: dadosPessoaisForm.cpf,
+        cnpj: dadosPessoaisForm.cnpj,
+        nome: (dadosPessoaisForm.first_name + ' ' + dadosPessoaisForm.last_name).trim() || prev.nome,
+      }));
+      AuthService.setUser({ name: (dadosPessoaisForm.first_name + ' ' + dadosPessoaisForm.last_name).trim() });
+      setDadosPessoaisEditando(false);
+    } catch {
+      alert('Erro ao salvar dados pessoais.');
+    } finally {
+      setDadosPessoaisSalvando(false);
+    }
+  };
+
   return (
     <div className="profile-page">
       <div className="profile-row">
@@ -284,6 +349,92 @@ export function MeuPerfilPage() {
 
         {/* RIGHT COLUMN */}
         <div className="profile-col-right">
+          {/* DADOS PESSOAIS */}
+          <div className="settings-card">
+            <div className="settings-card__header">
+              <div className="settings-card__title-bar"></div>
+              <i className="fa-solid fa-user"></i>
+              Dados Pessoais
+            </div>
+            <div className="settings-card__body">
+              {!dadosPessoaisEditando ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div>
+                    <span style={{ color: '#888', fontSize: '12px' }}>Nome completo</span>
+                    <p style={{ margin: 0, color: '#fff' }}>{profile.first_name} {profile.last_name}</p>
+                  </div>
+                  <div>
+                    <span style={{ color: '#888', fontSize: '12px' }}>CPF</span>
+                    <p style={{ margin: 0, color: '#fff' }}>{profile.cpf || '—'}</p>
+                  </div>
+                  <div>
+                    <span style={{ color: '#888', fontSize: '12px' }}>CNPJ</span>
+                    <p style={{ margin: 0, color: '#fff' }}>{profile.cnpj || '—'}</p>
+                  </div>
+                  <button className="formacao-btn" onClick={iniciarEdicaoDadosPessoais}>
+                    <i className="fa-solid fa-pencil"></i> Editar dados
+                  </button>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div className="settings-field">
+                    <label className="settings-field__label">Nome</label>
+                    <input
+                      className="settings-field__input"
+                      value={dadosPessoaisForm.first_name}
+                      onChange={(e) => setDadosPessoaisForm({ ...dadosPessoaisForm, first_name: e.target.value })}
+                      maxLength={50}
+                    />
+                  </div>
+                  <div className="settings-field">
+                    <label className="settings-field__label">Sobrenome</label>
+                    <input
+                      className="settings-field__input"
+                      value={dadosPessoaisForm.last_name}
+                      onChange={(e) => setDadosPessoaisForm({ ...dadosPessoaisForm, last_name: e.target.value })}
+                      maxLength={100}
+                    />
+                  </div>
+                  <div className="settings-field">
+                    <label className="settings-field__label">CPF</label>
+                    <input
+                      className="settings-field__input"
+                      value={dadosPessoaisForm.cpf}
+                      onChange={(e) => setDadosPessoaisForm({ ...dadosPessoaisForm, cpf: formatarCPF(e.target.value) })}
+                      placeholder="000.000.000-00"
+                      maxLength={14}
+                    />
+                  </div>
+                  <div className="settings-field">
+                    <label className="settings-field__label">CNPJ</label>
+                    <input
+                      className="settings-field__input"
+                      value={dadosPessoaisForm.cnpj}
+                      onChange={(e) => setDadosPessoaisForm({ ...dadosPessoaisForm, cnpj: formatarCNPJ(e.target.value) })}
+                      placeholder="00.000.000/0000-00"
+                      maxLength={18}
+                    />
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '8px' }}>
+                    <button
+                      className="sobre-card__btn sobre-card__btn--cancel"
+                      onClick={() => setDadosPessoaisEditando(false)}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      className="sobre-card__btn sobre-card__btn--save"
+                      onClick={handleDadosPessoaisSalvar}
+                      disabled={dadosPessoaisSalvando || !dadosPessoaisForm.first_name.trim()}
+                    >
+                      {dadosPessoaisSalvando ? 'Salvando...' : 'Salvar'}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
           {/* FORMAÇÃO ACADÊMICA */}
           <div className="settings-card">
             <div className="settings-card__header">

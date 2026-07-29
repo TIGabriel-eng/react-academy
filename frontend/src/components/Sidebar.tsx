@@ -18,6 +18,12 @@ function getMainAcademy(academyKey: string): AcademyConfig {
   return ACADEMIES[academyKey] || ACADEMIES['Academy Business'];
 }
 
+function getRoleAcademies(role: string): string[] {
+  if (role === 'cliente_orcoma' || role === 'empresario') return ['Academy Business'];
+  if (role === 'cliente_equipe' || role === 'colaborador_orcoma') return ['Academy Team'];
+  return MAIN_ACADEMIES;
+}
+
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -45,6 +51,10 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     setCurrentAcademy(getMainAcademy(academyKey));
   }, [location.pathname]);
 
+  const role = AuthService.getRole();
+  const allowedAcademies = getRoleAcademies(role);
+  const defaultPath = allowedAcademies[0] === 'Academy Business' ? '/business' : '/team';
+
   const handleNav = useCallback((page: string) => {
     if (page === 'sair') {
       AuthService.logout();
@@ -52,7 +62,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       return;
     }
     const urlMap: Record<string, string> = {
-      inicio: '/team',
+      inicio: defaultPath,
       'meu-perfil': '/meu-perfil',
       cursos: '/meus-cursos',
       eventos: '/eventos',
@@ -112,7 +122,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             <i className={`fa-solid fa-chevron-down ${envOpen ? 'is-open' : ''}`}></i>
           </div>
           <div className={`env-dropdown ${envOpen ? 'is-visible' : ''}`}>
-            {MAIN_ACADEMIES.map((key) => {
+            {allowedAcademies.map((key) => {
               const academy = ACADEMIES[key];
               return (
                 <div

@@ -56,7 +56,8 @@ async function request(method: string, path: string, body?: any, _retry = false)
 
   const res = await fetch(url, options);
 
-  if (res.status === 401 && !_retry) {
+  const isLoginPath = path === '/api/token/';
+  if (res.status === 401 && !_retry && !isLoginPath) {
     if (isRefreshing) {
       return new Promise<string>((resolve, reject) => {
         failedQueue.push({ resolve, reject });

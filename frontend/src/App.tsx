@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthService } from './services/auth';
 import { Layout } from './components/Layout';
 import { HomePage } from './pages/HomePage';
@@ -25,6 +25,29 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function getRoleAcademies(role: string): 'business' | 'team' | 'all' {
+  if (role === 'cliente_orcoma' || role === 'empresario') return 'business';
+  if (role === 'cliente_equipe' || role === 'colaborador_orcoma') return 'team';
+  return 'all';
+}
+
+function RoleGate({ children }: { children: React.ReactNode }) {
+  const role = AuthService.getRole();
+  const allowed = getRoleAcademies(role);
+  const location = useLocation();
+
+  const businessPaths = ['/business', '/contabil', '/empresarial'];
+  const teamPaths = ['/team', '/time', '/orcomakers'];
+
+  const onBusinessPath = businessPaths.some(p => location.pathname.startsWith(p));
+  const onTeamPath = teamPaths.some(p => location.pathname.startsWith(p));
+
+  if (allowed === 'business' && onTeamPath) return <Navigate to="/business" replace />;
+  if (allowed === 'team' && onBusinessPath) return <Navigate to="/team" replace />;
+
+  return <>{children}</>;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -37,7 +60,9 @@ export default function App() {
         } />
         <Route path="/" element={
           <ProtectedRoute>
-            <Layout />
+            <RoleGate>
+              <Layout />
+            </RoleGate>
           </ProtectedRoute>
         }>
           <Route index element={<HomePage />} />
