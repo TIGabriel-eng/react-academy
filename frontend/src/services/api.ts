@@ -21,7 +21,7 @@ async function refreshAccessToken(): Promise<string> {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ refresh: refreshToken }),
-    credentials: 'same-origin',
+    credentials: 'include',
   });
 
   if (!res.ok) throw new Error('Refresh failed');
@@ -51,7 +51,7 @@ async function request(method: string, path: string, body?: any, _retry = false)
   const accessToken = localStorage.getItem('access_token');
   if (accessToken) headers['Authorization'] = 'Bearer ' + accessToken;
 
-  const options: RequestInit = { method, headers, credentials: 'same-origin' as RequestCredentials };
+  const options: RequestInit = { method, headers, credentials: 'include' as RequestCredentials };
   if (body !== undefined) options.body = JSON.stringify(body);
 
   const res = await fetch(url, options);
@@ -130,7 +130,7 @@ export const ApiService = {
       return API.logout();
     }
     try {
-      await fetch(BASE_URL + '/api/logout/', { method: 'POST', credentials: 'same-origin' });
+      await fetch(BASE_URL + '/api/logout/', { method: 'POST', credentials: 'include' });
     } catch {}
     const keys = ['access_token', 'refresh_token', 'orcoma_user_role', 'orcoma_user_email', 'orcoma_user_name', 'orcoma_user_avatar', 'orcoma_plano_nome'];
     keys.forEach(k => localStorage.removeItem(k));
@@ -181,7 +181,7 @@ export const ApiService = {
     if (accessToken) headers['Authorization'] = 'Bearer ' + accessToken;
     const formData = new FormData();
     formData.append('avatar', file);
-    const res = await fetch(url, { method: 'POST', headers, body: formData, credentials: 'same-origin' });
+    const res = await fetch(url, { method: 'POST', headers, body: formData, credentials: 'include' });
     let data;
     try { data = await res.json(); } catch { data = null; }
     if (!res.ok) throw new Error(data?.detail || data?.error || 'Erro ao enviar avatar');
