@@ -1,6 +1,6 @@
 declare const API: any;
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'https://orcoma-academy-backend.onrender.com';
+const BASE_URL = import.meta.env.VITE_API_URL || 'https://dashboard.orcomacontabilidade.com.br';
 
 let isRefreshing = false;
 let failedQueue: Array<{ resolve: (token: string) => void; reject: (err: any) => void }> = [];
