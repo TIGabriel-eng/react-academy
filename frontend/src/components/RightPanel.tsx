@@ -86,21 +86,23 @@ export function RightPanel() {
   return (
     <aside className="right-panel">
       <div className="progress-profile-bar">
-        <img src={avatar || '../assets/images/avatar-icon.jpg'} alt="Avatar" className="progress-sidebar__avatar" id="userAvatar" onError={(e) => { (e.target as HTMLImageElement).src = '../assets/images/avatar-icon.jpg'; }} style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover' }} />
-        <div className="progress-sidebar__user-info">
-          <span className="progress-sidebar__username">{userName}</span>
-          <span className={`progress-sidebar__plan pill-${role === 'admin' ? 'admin' : role === 'empresario' ? 'empresario' : role === 'visitor' ? 'visitor' : role === 'colaborador_orcoma' ? 'colaborador_orcoma' : 'cliente'}`} id="adminPill">
-            {PLANO_MAP[role] || 'Visitante'}
-          </span>
-          {role === 'admin' && (
-            <div className="admin-dropdown" id="adminDropdown">
-              <a href="https://orcoma-academy-backend.onrender.com/admin/" target="_blank" className="admin-dropdown__item">
-                <i className="fa-solid fa-shield-halved"></i> Painel Administrativo
-              </a>
-            </div>
-          )}
+        <div className="progress-profile-bar__trigger" onClick={() => setProfileOpen(!profileOpen)}>
+          <img src={avatar || '../assets/images/avatar-icon.jpg'} alt="Avatar" className="progress-sidebar__avatar" id="userAvatar" onError={(e) => { (e.target as HTMLImageElement).src = '../assets/images/avatar-icon.jpg'; }} style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover' }} />
+          <div className="progress-sidebar__user-info">
+            <span className="progress-sidebar__username">{userName}</span>
+            <span className={`progress-sidebar__plan pill-${role === 'admin' ? 'admin' : role === 'empresario' ? 'empresario' : role === 'visitor' ? 'visitor' : role === 'colaborador_orcoma' ? 'colaborador_orcoma' : 'cliente'}`} id="adminPill">
+              {PLANO_MAP[role] || 'Visitante'}
+            </span>
+            {role === 'admin' && (
+              <div className="admin-dropdown" id="adminDropdown">
+                <a href="https://orcoma-academy-backend.onrender.com/admin/" target="_blank" className="admin-dropdown__item">
+                  <i className="fa-solid fa-shield-halved"></i> Painel Administrativo
+                </a>
+              </div>
+            )}
+          </div>
+          <i className="fa-solid fa-chevron-down progress-sidebar__chevron" id="profileChevron" onClick={() => setProfileOpen(!profileOpen)}></i>
         </div>
-        <i className="fa-solid fa-chevron-down progress-sidebar__chevron" id="profileChevron" onClick={() => setProfileOpen(!profileOpen)}></i>
         <div className={`profile-dropdown ${profileOpen ? 'is-visible' : ''}`} id="profileDropdown" onClick={(e) => e.stopPropagation()}>
           <a href="/meu-perfil" className="profile-dropdown__item" onClick={() => setProfileOpen(false)}>
             <i className="fa-regular fa-user"></i> Meu Perfil

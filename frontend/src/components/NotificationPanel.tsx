@@ -77,6 +77,7 @@ export function NotificationPanel({ open, onClose }: NotificationPanelProps) {
   return (
     <div
       ref={panelRef}
+      className="notification-panel"
       style={{
         position: 'absolute',
         top: '100%',

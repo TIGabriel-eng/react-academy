@@ -99,11 +99,36 @@ export function Topbar({ onMenuToggle, onSearchOpen, showSearch, showProfile }: 
           <NotificationPanel open={notifOpen} onClose={() => setNotifOpen(false)} />
         </div>
 
+        {/* Perfil mobile — aparece quando RightPanel some (telas ≤1023px) */}
+        <div className="topbar-profile topbar-profile--mobile" style={{ position: 'relative' }}>
+          <div className="topbar-profile__trigger" onClick={() => setProfileOpen(!profileOpen)}>
+            <img src={avatar || '../assets/images/avatar-icon.jpg'} alt="Avatar" className="topbar-profile__avatar" onError={(e) => { (e.target as HTMLImageElement).src = '../assets/images/avatar-icon.jpg'; }} />
+          </div>
+          {profileOpen && (
+            <div className="profile-dropdown is-visible" style={{ position: 'absolute', top: '100%', right: 0, marginTop: '4px' }} onClick={(e) => e.stopPropagation()}>
+              <a href="/meu-perfil" className="profile-dropdown__item" onClick={() => setProfileOpen(false)}>
+                <i className="fa-regular fa-user"></i> Meu Perfil
+              </a>
+              <a href="/meus-cursos" className="profile-dropdown__item" onClick={() => setProfileOpen(false)}>
+                <i className="fa-solid fa-graduation-cap"></i> Meus cursos
+              </a>
+              <a href="/certificados" className="profile-dropdown__item" onClick={() => setProfileOpen(false)}>
+                <i className="fa-solid fa-certificate"></i> Certificados
+              </a>
+              <div className="profile-dropdown__divider"></div>
+              <a href="#" className="profile-dropdown__item profile-dropdown__item--logout" onClick={(e) => { e.preventDefault(); handleLogout(); }}>
+                <i className="fa-solid fa-right-from-bracket"></i> Sair
+              </a>
+            </div>
+          )}
+        </div>
+
+        {/* Perfil desktop — só nas rotas sem RightPanel */}
         {showProfile && (
-          <div className="topbar-profile" style={{ position: 'relative' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', padding: '4px 8px', borderRadius: '8px' }} onClick={() => setProfileOpen(!profileOpen)}>
-              <img src={avatar || '../assets/images/avatar-icon.jpg'} alt="Avatar" style={{ width: '50px', height: '50px', borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--color-accent)' }} onError={(e) => { (e.target as HTMLImageElement).src = '../assets/images/avatar-icon.jpg'; }} />
-              <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
+          <div className="topbar-profile topbar-profile--desktop" style={{ position: 'relative' }}>
+            <div className="topbar-profile__trigger" onClick={() => setProfileOpen(!profileOpen)}>
+              <img src={avatar || '../assets/images/avatar-icon.jpg'} alt="Avatar" className="topbar-profile__avatar" onError={(e) => { (e.target as HTMLImageElement).src = '../assets/images/avatar-icon.jpg'; }} />
+              <div className="topbar-profile__details">
                 <span className="progress-sidebar__username">{userName}</span>
                 <span className={`progress-sidebar__plan pill-${role === 'admin' ? 'admin' : role === 'empresario' ? 'empresario' : role === 'visitor' ? 'visitor' : role === 'colaborador_orcoma' ? 'colaborador_orcoma' : 'cliente'}`}>
                   {PLANO_MAP[role] || 'Visitante'}
