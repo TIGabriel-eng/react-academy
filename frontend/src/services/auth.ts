@@ -1,38 +1,40 @@
 const auth = typeof window !== 'undefined' ? (window as any).auth : undefined;
 
+const STORAGE_KEYS = {
+  loggedIn: 'orcoma_logged_in',
+  role: 'orcoma_user_role',
+  email: 'orcoma_user_email',
+  name: 'orcoma_user_name',
+  avatar: 'orcoma_user_avatar',
+  legacyAccess: 'access_token',
+  legacyRefresh: 'refresh_token',
+};
+
 export const AuthService = {
-  getAccessToken(): string | null {
-    return auth?.getAccessToken?.() ?? localStorage.getItem('access_token');
-  },
-
-  getRefreshToken(): string | null {
-    return auth?.getRefreshToken?.() ?? localStorage.getItem('refresh_token');
-  },
-
   getUser() {
     if (auth?.getUser) return auth.getUser();
     return {
-      role: localStorage.getItem('orcoma_user_role') || 'visitor',
-      email: localStorage.getItem('orcoma_user_email') || '',
-      name: localStorage.getItem('orcoma_user_name') || '',
-      avatar: localStorage.getItem('orcoma_user_avatar') || '',
+      role: localStorage.getItem(STORAGE_KEYS.role) || 'visitor',
+      email: localStorage.getItem(STORAGE_KEYS.email) || '',
+      name: localStorage.getItem(STORAGE_KEYS.name) || '',
+      avatar: localStorage.getItem(STORAGE_KEYS.avatar) || '',
     };
   },
 
   getRole(): string {
-    return (auth?.getRole?.() ?? localStorage.getItem('orcoma_user_role')) || 'visitor';
+    return (auth?.getRole?.() ?? localStorage.getItem(STORAGE_KEYS.role)) || 'visitor';
   },
 
   getEmail(): string {
-    return (auth?.getEmail?.() ?? localStorage.getItem('orcoma_user_email')) || '';
+    return (auth?.getEmail?.() ?? localStorage.getItem(STORAGE_KEYS.email)) || '';
   },
 
   getName(): string {
-    return (auth?.getName?.() ?? localStorage.getItem('orcoma_user_name')) || 'Usuário';
+    return (auth?.getName?.() ?? localStorage.getItem(STORAGE_KEYS.name)) || 'Usuário';
   },
 
   getAvatar(): string {
-    return (auth?.getAvatar?.() ?? localStorage.getItem('orcoma_user_avatar')) || '';
+    return (auth?.getAvatar?.() ?? localStorage.getItem(STORAGE_KEYS.avatar)) || '';
   },
 
   getCurrentAcademy(): string {
@@ -45,28 +47,37 @@ export const AuthService = {
   },
 
   isLoggedIn(): boolean {
-    return auth?.isLoggedIn?.() ?? !!localStorage.getItem('access_token');
+    return auth?.isLoggedIn?.() ?? !!localStorage.getItem(STORAGE_KEYS.loggedIn);
   },
 
   logout() {
     if (auth?.logout) {
       auth.logout();
     } else {
-      const keys = ['access_token', 'refresh_token', 'orcoma_user_role', 'orcoma_user_email', 'orcoma_user_name', 'orcoma_user_avatar'];
-      keys.forEach(k => localStorage.removeItem(k));
+      const keys = [
+        STORAGE_KEYS.loggedIn,
+        STORAGE_KEYS.role,
+        STORAGE_KEYS.email,
+        STORAGE_KEYS.name,
+        STORAGE_KEYS.avatar,
+        STORAGE_KEYS.legacyAccess,
+        STORAGE_KEYS.legacyRefresh,
+      ];
+      keys.forEach((k) => localStorage.removeItem(k));
     }
   },
 
-  login(tokens: { access: string; refresh?: string }, userData: any) {
+  login(userData: any) {
     if (auth?.login) {
-      auth.login(tokens, userData);
+      auth.login({}, userData);
     } else {
-      localStorage.setItem('access_token', tokens.access);
-      if (tokens.refresh) localStorage.setItem('refresh_token', tokens.refresh);
-      if (userData.role) localStorage.setItem('orcoma_user_role', userData.role);
-      if (userData.email) localStorage.setItem('orcoma_user_email', userData.email);
-      if (userData.name) localStorage.setItem('orcoma_user_name', userData.name);
-      if (userData.avatar) localStorage.setItem('orcoma_user_avatar', userData.avatar);
+      localStorage.removeItem(STORAGE_KEYS.legacyAccess);
+      localStorage.removeItem(STORAGE_KEYS.legacyRefresh);
+      localStorage.setItem(STORAGE_KEYS.loggedIn, '1');
+      if (userData.role) localStorage.setItem(STORAGE_KEYS.role, userData.role);
+      if (userData.email) localStorage.setItem(STORAGE_KEYS.email, userData.email);
+      if (userData.name) localStorage.setItem(STORAGE_KEYS.name, userData.name);
+      if (userData.avatar) localStorage.setItem(STORAGE_KEYS.avatar, userData.avatar);
     }
   },
 

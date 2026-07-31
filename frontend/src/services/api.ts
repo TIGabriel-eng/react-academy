@@ -1,40 +1,33 @@
+import { AuthService } from './auth';
+
 declare const API: any;
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'https://dashboard.orcomacontabilidade.com.br';
 
 let isRefreshing = false;
-let failedQueue: Array<{ resolve: (token: string) => void; reject: (err: any) => void }> = [];
+let failedQueue: Array<{ resolve: () => void; reject: (err: any) => void }> = [];
 
-function processQueue(error: any, token: string | null) {
+function processQueue(error: any) {
   failedQueue.forEach(({ resolve, reject }) => {
     if (error) reject(error);
-    else resolve(token!);
+    else resolve();
   });
   failedQueue = [];
 }
 
-async function refreshAccessToken(): Promise<string> {
-  const refreshToken = localStorage.getItem('refresh_token');
-  if (!refreshToken) throw new Error('No refresh token');
-
+async function refreshAccessToken(): Promise<void> {
   const res = await fetch(BASE_URL + '/api/token/refresh/', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ refresh: refreshToken }),
+    body: '{}',
     credentials: 'include',
   });
 
   if (!res.ok) throw new Error('Refresh failed');
-
-  const data = await res.json();
-  localStorage.setItem('access_token', data.access);
-  if (data.refresh) localStorage.setItem('refresh_token', data.refresh);
-  return data.access;
 }
 
 function forceLogout() {
-  const keys = ['access_token', 'refresh_token', 'orcoma_user_role', 'orcoma_user_email', 'orcoma_user_name', 'orcoma_user_avatar', 'orcoma_plano_nome'];
-  keys.forEach(k => localStorage.removeItem(k));
+  AuthService.logout();
   window.location.href = '/login';
 }
 
@@ -48,8 +41,6 @@ async function request(method: string, path: string, body?: any, _retry = false)
 
   const url = BASE_URL + path;
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  const accessToken = localStorage.getItem('access_token');
-  if (accessToken) headers['Authorization'] = 'Bearer ' + accessToken;
 
   const options: RequestInit = { method, headers, credentials: 'include' as RequestCredentials };
   if (body !== undefined) options.body = JSON.stringify(body);
@@ -59,20 +50,16 @@ async function request(method: string, path: string, body?: any, _retry = false)
   const isLoginPath = path === '/api/token/';
   if (res.status === 401 && !_retry && !isLoginPath) {
     if (isRefreshing) {
-      return new Promise<string>((resolve, reject) => {
+      return new Promise<void>((resolve, reject) => {
         failedQueue.push({ resolve, reject });
-      }).then((newToken) => {
-        headers['Authorization'] = 'Bearer ' + newToken;
-        return fetch(url, { ...options, headers }).then(r => r.json());
-      });
+      }).then(() => fetch(url, options).then(r => r.json()));
     }
 
     isRefreshing = true;
     try {
-      const newToken = await refreshAccessToken();
-      processQueue(null, newToken);
-      headers['Authorization'] = 'Bearer ' + newToken;
-      const retryRes = await fetch(url, { ...options, headers });
+      await refreshAccessToken();
+      processQueue(null);
+      const retryRes = await fetch(url, options);
       let retryData;
       try { retryData = await retryRes.json(); } catch { retryData = null; }
       if (!retryRes.ok) {
@@ -83,7 +70,7 @@ async function request(method: string, path: string, body?: any, _retry = false)
       }
       return retryData;
     } catch (err) {
-      processQueue(err, null);
+      processQueue(err);
       forceLogout();
       throw err;
     } finally {
@@ -132,8 +119,7 @@ export const ApiService = {
     try {
       await fetch(BASE_URL + '/api/logout/', { method: 'POST', credentials: 'include' });
     } catch {}
-    const keys = ['access_token', 'refresh_token', 'orcoma_user_role', 'orcoma_user_email', 'orcoma_user_name', 'orcoma_user_avatar', 'orcoma_plano_nome'];
-    keys.forEach(k => localStorage.removeItem(k));
+    AuthService.logout();
   },
 
   // Dashboard
@@ -176,12 +162,9 @@ export const ApiService = {
 
   async uploadAvatar(file: File) {
     const url = BASE_URL + '/api/avatar/';
-    const headers: Record<string, string> = {};
-    const accessToken = localStorage.getItem('access_token');
-    if (accessToken) headers['Authorization'] = 'Bearer ' + accessToken;
     const formData = new FormData();
     formData.append('avatar', file);
-    const res = await fetch(url, { method: 'POST', headers, body: formData, credentials: 'include' });
+    const res = await fetch(url, { method: 'POST', body: formData, credentials: 'include' });
     let data;
     try { data = await res.json(); } catch { data = null; }
     if (!res.ok) throw new Error(data?.detail || data?.error || 'Erro ao enviar avatar');

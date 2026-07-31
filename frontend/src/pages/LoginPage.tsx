@@ -33,29 +33,22 @@ export function LoginPage() {
     setLoading(true);
     try {
       const data = await ApiService.post('/api/token/', { username: email, password });
-      if (data.access) {
-        const userData = data.user || {};
-        const role = userData.role || 'visitor';
-        AuthService.login(
-          { access: data.access, refresh: data.refresh },
-          {
-            role,
-            email: userData.email || '',
-            name: (userData.first_name + ' ' + userData.last_name).trim() || userData.username,
-            avatar: userData.avatar_url || '',
-          }
-        );
-        if (role === 'cliente_orcoma' || role === 'empresario') {
-          AuthService.setCurrentAcademy('business');
-          navigate('/business');
-        } else if (role === 'cliente_equipe' || role === 'colaborador_orcoma') {
-          AuthService.setCurrentAcademy('team');
-          navigate('/team');
-        } else {
-          navigate('/team');
-        }
+      const userData = data.user || {};
+      const role = userData.role || 'visitor';
+      AuthService.login({
+        role,
+        email: userData.email || email,
+        name: (userData.first_name + ' ' + userData.last_name).trim() || userData.username,
+        avatar: userData.avatar_url || '',
+      });
+      if (role === 'cliente_orcoma' || role === 'empresario') {
+        AuthService.setCurrentAcademy('business');
+        navigate('/business');
+      } else if (role === 'cliente_equipe' || role === 'colaborador_orcoma') {
+        AuthService.setCurrentAcademy('team');
+        navigate('/team');
       } else {
-        setError('Usuário ou senha inválidos.');
+        navigate('/team');
       }
     } catch (err: any) {
       setError(err.message || 'Erro ao conectar ao servidor. Verifique se o backend está rodando.');
