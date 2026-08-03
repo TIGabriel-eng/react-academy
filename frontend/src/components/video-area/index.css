@@ -502,6 +502,49 @@
   to { opacity: 1; }
 }
 
+/* ── TAB PAUSE OVERLAY ── */
+.va-tab-pause-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 45;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.75);
+  animation: vaFadeIn 0.3s ease;
+  pointer-events: none;
+}
+.va-tab-pause-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  background: rgba(15,23,42,0.95);
+  border: 1px solid rgba(245,158,11,0.3);
+  padding: 20px 32px;
+  border-radius: 14px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  animation: vaBadgePop 0.35s cubic-bezier(0.2,1.4,0.4,1);
+}
+.va-tab-pause-badge__icon {
+  width: 44px;
+  height: 44px;
+  background: rgba(245,158,11,0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f59e0b;
+  font-size: 1.1rem;
+}
+.va-tab-pause-badge__text {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #e5e7eb;
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+
 /* ── LOADING ── */
 .va-loading {
   position: absolute;

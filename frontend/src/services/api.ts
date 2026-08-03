@@ -2,7 +2,7 @@ import { AuthService } from './auth';
 
 declare const API: any;
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'https://dashboard.orcomacontabilidade.com.br';
+const BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? '' : 'https://dashboard.orcomacontabilidade.com.br');
 
 let isRefreshing = false;
 let failedQueue: Array<{ resolve: () => void; reject: (err: any) => void }> = [];

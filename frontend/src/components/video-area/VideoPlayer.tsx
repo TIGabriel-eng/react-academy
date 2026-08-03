@@ -60,6 +60,7 @@ export function VideoPlayer({ videoUrl, title, cursoId, onProgress, onEnded }: V
   const [showCompletedOverlay, setShowCompletedOverlay] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [controlsVisible, setControlsVisible] = useState(true);
+  const [showTabPauseOverlay, setShowTabPauseOverlay] = useState(false);
 
   const tempoAssistidoRef = useRef(0);
   const ultimoTempoRef = useRef(0);
@@ -489,6 +490,16 @@ export function VideoPlayer({ videoUrl, title, cursoId, onProgress, onEnded }: V
     return () => window.removeEventListener('keydown', handleKey);
   }, [togglePlay, toggleFullscreen, toggleMute, showControlsTemporarily, videoType, duration]);
 
+  const pauseVideo = useCallback(() => {
+    if (videoType === 'html5' && videoRef.current) {
+      videoRef.current.pause();
+    } else if (videoType === 'youtube' && ytPlayerRef.current) {
+      try { ytPlayerRef.current.pauseVideo(); } catch {}
+    } else if (videoType === 'vimeo' && vimeoPlayerRef.current) {
+      try { vimeoPlayerRef.current.pause(); } catch {}
+    }
+  }, [videoType]);
+
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (isPlaying) {
@@ -496,17 +507,38 @@ export function VideoPlayer({ videoUrl, title, cursoId, onProgress, onEnded }: V
       }
     };
     const handleVisibilityChange = () => {
-      if (document.hidden && isPlaying && videoType === 'html5' && videoRef.current) {
-        videoRef.current.pause();
+      if (document.hidden && isPlaying) {
+        pauseVideo();
+        setShowTabPauseOverlay(true);
+      } else if (!document.hidden) {
+        setShowTabPauseOverlay(false);
       }
+    };
+    const handleWindowBlur = () => {
+      if (isPlaying) {
+        // Pequeno atraso para verificar se o foco voltou (ex: clique em iframe do YouTube/Vimeo)
+        setTimeout(() => {
+          if (!document.hasFocus() && isPlayingRef.current) {
+            pauseVideo();
+            setShowTabPauseOverlay(true);
+          }
+        }, 200);
+      }
+    };
+    const handleWindowFocus = () => {
+      setShowTabPauseOverlay(false);
     };
     window.addEventListener('beforeunload', handleBeforeUnload);
     document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('blur', handleWindowBlur);
+    window.addEventListener('focus', handleWindowFocus);
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('blur', handleWindowBlur);
+      window.removeEventListener('focus', handleWindowFocus);
     };
-  }, [isPlaying, duration, saveProgress, videoType]);
+  }, [isPlaying, duration, saveProgress, videoType, pauseVideo]);
 
   useEffect(() => {
     return () => {
@@ -591,6 +623,17 @@ export function VideoPlayer({ videoUrl, title, cursoId, onProgress, onEnded }: V
               </svg>
             </div>
             <span className="va-completed-badge__text">Aula Concluída!</span>
+          </div>
+        </div>
+      )}
+
+      {showTabPauseOverlay && (
+        <div className="va-tab-pause-overlay">
+          <div className="va-tab-pause-badge">
+            <div className="va-tab-pause-badge__icon">
+              <i className="fa-solid fa-eye-slash" />
+            </div>
+            <span className="va-tab-pause-badge__text">Vídeo pausado — troca de aba detectada</span>
           </div>
         </div>
       )}
