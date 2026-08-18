@@ -165,9 +165,10 @@ export function LoginPage() {
     setRecoveryLoading(true);
     try {
       await ApiService.post('/api/password-reset/', { email: recoveryEmail });
-      setRecoveryMsg('Instruções enviadas para seu e-mail.');
+      setRecoveryMsg('Verifique sua caixa de entrada! Enviamos as instruções para o seu e-mail.');
+      setRecoveryEmail('');
     } catch {
-      setRecoveryMsg('Erro ao enviar. Verifique o e-mail informado.');
+      setRecoveryMsg('Erro ao enviar. Tente novamente.');
     } finally {
       setRecoveryLoading(false);
     }
