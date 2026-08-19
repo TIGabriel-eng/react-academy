@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ApiService } from '../services/api';
+import { agruparCursosPorAcademia } from '../types';
 import type { Curso } from '../types';
+import { AcademySection } from '../components/AcademySection';
 import cursoNaoConcluidoImg from '../assets/images/curso-não-concluído.png';
 
 export function CursosConcluidosPage() {
@@ -18,45 +20,41 @@ export function CursosConcluidosPage() {
       .catch(() => {});
   }, []);
 
-  const concluidos = cursos.filter((c) => {
-    const mat = matriculas.find((m) => m.curso === c.id);
-    return mat?.concluido;
-  });
+  const concluidos = useMemo(() => {
+    return cursos.filter((c) => {
+      const mat = matriculas.find((m) => m.curso === c.id);
+      return mat?.concluido;
+    });
+  }, [cursos, matriculas]);
+
+  const grupos = useMemo(() => agruparCursosPorAcademia(concluidos), [concluidos]);
+  const temCursos = Object.values(grupos).some((g) => g.length > 0);
 
   return (
     <div style={{ padding: '12px 24px' }}>
       <h1 style={{ fontFamily: "var(--font-display)", fontSize: '1.3125rem', fontWeight: 800, marginBottom: '16px', color: '#ff9d00' }}>Cursos Concluídos</h1>
-      {concluidos.length === 0 ? (
+      {!temCursos ? (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 12px' }}>
           <img src={cursoNaoConcluidoImg} alt="Nenhum curso concluído" style={{ maxWidth: '160px', marginBottom: '16px' }} />
           <p style={{ color: 'var(--color-text-secondary)', fontSize: '1rem', fontWeight: 600, textAlign: 'center' }}>Você ainda não concluiu nenhum curso!</p>
         </div>
       ) : (
-        <div className="cursos-grid">
-          {concluidos.map((c) => {
-            const slug = c.slug || c.id;
-            return (
-              <div key={c.id} className="curso-card" onClick={() => navigate('/video-area/' + slug)}>
-                <div className="curso-card__image">
-                  <img src={c.thumbnail_url || ''} alt={c.titulo} loading="lazy" />
-                  <span className="curso-card__status status-concluido">Concluído</span>
-                </div>
-                <div className="curso-card__name">{c.titulo}</div>
-                <div className="curso-card__divider"></div>
-                <div className="curso-card__meta">
-                  <span className="concluido-badge">Concluído</span>
-                  <span className="certificado-link" onClick={(e) => { e.stopPropagation(); navigate('/certificados'); }}>
-                    <i className="fa-solid fa-file-pdf"></i> Emitir Certificado
-                  </span>
-                </div>
-                <div className="curso-card__progress">
-                  <div className="progress__bar-track"><div className="progress__bar-fill" style={{ width: '100%' }}></div></div>
-                  <span>100%</span>
-                </div>
+        Object.entries(grupos).map(([academia, cursosDaAcademia]) => (
+          <AcademySection
+            key={academia}
+            academyName={academia}
+            cursos={cursosDaAcademia}
+            getCursoStatus={() => ({ label: 'Concluído', className: 'status-concluido' })}
+            extraContent={(_curso) => (
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                <span className="concluido-badge">Concluído</span>
+                <span className="certificado-link" onClick={(e) => { e.stopPropagation(); navigate('/certificados'); }}>
+                  <i className="fa-solid fa-file-pdf"></i> Certificado
+                </span>
               </div>
-            );
-          })}
-        </div>
+            )}
+          />
+        ))
       )}
     </div>
   );

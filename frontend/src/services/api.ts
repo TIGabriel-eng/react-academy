@@ -185,6 +185,10 @@ export const ApiService = {
     return this.get('/api/cursos/');
   },
 
+  async getCursosPorAmbiente(ambiente: string) {
+    return this.get('/api/cursos/?ambiente=' + encodeURIComponent(ambiente));
+  },
+
   async getCursosRecomendados() {
     return this.get('/api/cursos-recomendados/');
   },

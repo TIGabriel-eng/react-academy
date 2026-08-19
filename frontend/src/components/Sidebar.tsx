@@ -33,7 +33,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
 
   useEffect(() => {
     const path = location.pathname;
-    let academyKey = 'Academy Business';
+    let academyKey: string | null = null;
     if (path.includes('/contabil')) {
       academyKey = 'Academy Contabil';
     } else if (path.includes('/empresarial')) {
@@ -47,8 +47,10 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     } else if (path.includes('/team')) {
       academyKey = 'Academy Team';
     }
-    AuthService.setCurrentAcademy(academyKey);
-    setCurrentAcademy(getMainAcademy(academyKey));
+    if (academyKey) {
+      AuthService.setCurrentAcademy(academyKey);
+      setCurrentAcademy(getMainAcademy(academyKey));
+    }
   }, [location.pathname]);
 
   const role = AuthService.getRole();

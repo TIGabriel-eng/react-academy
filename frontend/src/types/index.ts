@@ -15,6 +15,7 @@ export interface Curso {
   tipo?: string;
   status?: string;
   is_gratuito?: boolean;
+  ambiente_nome?: string;
   videos?: Video[];
 }
 
@@ -171,3 +172,16 @@ export const PLANO_MAP: Record<string, string> = {
   'empresario': 'Empresário',
   'visitor': 'Visitante',
 };
+
+export const ACADEMY_EXCLUSAO = ['Academy Orcomakers'];
+
+export function agruparCursosPorAcademia(cursos: Curso[]): Record<string, Curso[]> {
+  const grupos: Record<string, Curso[]> = {};
+  for (const curso of cursos) {
+    const academia = curso.ambiente_nome || 'Sem Academy';
+    if (ACADEMY_EXCLUSAO.includes(academia)) continue;
+    if (!grupos[academia]) grupos[academia] = [];
+    grupos[academia].push(curso);
+  }
+  return grupos;
+}

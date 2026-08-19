@@ -23,8 +23,8 @@ export function CertificadosPage() {
   }, []);
 
   return (
-    <div style={{ padding: '24px', maxWidth: '800px', margin: '0 auto' }}>
-      <h1 style={{ fontFamily: "var(--font-display)", fontSize: '1.6rem', fontWeight: 700, marginBottom: '24px' }}>Meus Certificados</h1>
+    <div style={{ padding: '12px 24px' }}>
+      <h1 style={{ fontFamily: "var(--font-display)", fontSize: '1.3125rem', fontWeight: 800, marginBottom: '16px', color: '#ff9d00' }}>Meus Certificados</h1>
 
       {loading ? (
         <div style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--color-text-muted)' }}>
@@ -32,73 +32,33 @@ export function CertificadosPage() {
           <p style={{ marginTop: '12px' }}>Carregando certificados...</p>
         </div>
       ) : certificados.length === 0 ? (
-        <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)', padding: '60px 24px', textAlign: 'center' }}>
-          <i className="fa-solid fa-certificate" style={{ fontSize: '3rem', color: 'var(--color-accent)', marginBottom: '16px', display: 'block' }}></i>
-          <p style={{ color: 'var(--color-text-secondary)', fontSize: '1rem', fontWeight: 600, marginBottom: '8px' }}>Nenhum certificado ainda</p>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 12px' }}>
+          <i className="fa-solid fa-certificate" style={{ fontSize: '3rem', color: 'var(--color-accent)', marginBottom: '16px' }}></i>
+          <p style={{ color: 'var(--color-text-secondary)', fontSize: '1rem', fontWeight: 600, textAlign: 'center' }}>Nenhum certificado ainda</p>
           <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>Complete cursos para gerar certificados</p>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div className="cursos-grid">
           {certificados.map((cert) => (
-            <div
-              key={cert.id}
-              style={{
-                background: 'var(--color-surface)',
-                border: '1px solid var(--color-border)',
-                borderRadius: 'var(--radius-lg)',
-                padding: '20px 24px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '16px',
-              }}
-            >
-              <div
-                style={{
-                  width: '48px',
-                  height: '48px',
-                  borderRadius: 'var(--radius-lg)',
-                  background: 'rgba(245, 158, 11, 0.15)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                }}
-              >
-                <i className="fa-solid fa-certificate" style={{ color: '#f59e0b', fontSize: '1.3rem' }}></i>
+            <div key={cert.id} className="curso-card">
+              <div className="curso-card__image" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(37,99,235,0.1))' }}>
+                <i className="fa-solid fa-certificate" style={{ fontSize: '3rem', color: '#f59e0b' }}></i>
+                <span className="curso-card__status" style={{ background: 'rgba(245,158,11,0.85)', color: '#fff' }}>Certificado</span>
               </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontWeight: 600, fontSize: '0.95rem', marginBottom: '2px' }}>{cert.curso_titulo}</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
-                  Emitido em {new Date(cert.emitido_em).toLocaleDateString('pt-BR')}
-                  {cert.curso_duracao && ` · ${cert.curso_duracao}`}
-                </div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginTop: '2px' }}>
-                  Código: {cert.codigo}
-                </div>
+              <div className="curso-card__name">{cert.curso_titulo}</div>
+              <div className="curso-card__divider"></div>
+              <div className="curso-card__meta" style={{ justifyContent: 'space-between' }}>
+                <span><i className="fa-solid fa-calendar"></i> {new Date(cert.emitido_em).toLocaleDateString('pt-BR')}</span>
+                <a
+                  href={cert.download_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  style={{ color: 'var(--color-accent)', textDecoration: 'none', fontWeight: 600, fontSize: '0.75rem' }}
+                >
+                  <i className="fa-solid fa-download"></i> Download
+                </a>
               </div>
-              <a
-                href={cert.download_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '10px 18px',
-                  background: 'linear-gradient(135deg, var(--color-accent-2), #2563eb)',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: 'var(--radius-full)',
-                  fontWeight: 600,
-                  fontSize: '0.8rem',
-                  cursor: 'pointer',
-                  textDecoration: 'none',
-                  whiteSpace: 'nowrap',
-                  flexShrink: 0,
-                }}
-              >
-                <i className="fa-solid fa-download"></i> Download
-              </a>
             </div>
           ))}
         </div>
