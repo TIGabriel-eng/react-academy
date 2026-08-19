@@ -102,7 +102,7 @@ export function Topbar({ onMenuToggle, onSearchOpen, showSearch, showProfile }: 
         {/* Perfil mobile — aparece quando RightPanel some (telas ≤1023px) */}
         <div className="topbar-profile topbar-profile--mobile" style={{ position: 'relative' }}>
           <div className="topbar-profile__trigger" onClick={() => setProfileOpen(!profileOpen)}>
-            <img src={avatar || '../assets/images/avatar-icon.jpg'} alt="Avatar" className="topbar-profile__avatar" onError={(e) => { (e.target as HTMLImageElement).src = '../assets/images/avatar-icon.jpg'; }} />
+            <img src={avatar || '../assets/images/business.png'} alt="Avatar" className="topbar-profile__avatar" onError={(e) => { (e.target as HTMLImageElement).src = '../assets/images/business.png'; }} />
           </div>
           {profileOpen && (
             <div className="profile-dropdown is-visible" style={{ position: 'absolute', top: '100%', right: 0, marginTop: '4px' }} onClick={(e) => e.stopPropagation()}>
@@ -127,7 +127,7 @@ export function Topbar({ onMenuToggle, onSearchOpen, showSearch, showProfile }: 
         {showProfile && (
           <div className="topbar-profile topbar-profile--desktop" style={{ position: 'relative' }}>
             <div className="topbar-profile__trigger" onClick={() => setProfileOpen(!profileOpen)}>
-              <img src={avatar || '../assets/images/avatar-icon.jpg'} alt="Avatar" className="topbar-profile__avatar" onError={(e) => { (e.target as HTMLImageElement).src = '../assets/images/avatar-icon.jpg'; }} />
+              <img src={avatar || '../assets/images/business.png'} alt="Avatar" className="topbar-profile__avatar" onError={(e) => { (e.target as HTMLImageElement).src = '../assets/images/business.png'; }} />
               <div className="topbar-profile__details">
                 <span className="progress-sidebar__username">{userName}</span>
                 <span className={`progress-sidebar__plan pill-${role === 'admin' ? 'admin' : role === 'empresario' ? 'empresario' : role === 'visitor' ? 'visitor' : role === 'colaborador_orcoma' ? 'colaborador_orcoma' : 'cliente'}`}>
