@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
 import { ApiService } from '../services/api';
+import { CertificadoModal } from '../components/CertificadoModal';
 
 interface Certificado {
   id: number;
   codigo: string;
   emitido_em: string;
   curso_titulo: string;
+  curso_descricao: string | null;
   curso_duracao: string | null;
+  curso_modulos: string | null;
   aluno_nome: string;
   download_url: string;
 }
@@ -14,6 +17,7 @@ interface Certificado {
 export function CertificadosPage() {
   const [certificados, setCertificados] = useState<Certificado[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCert, setSelectedCert] = useState<Certificado | null>(null);
 
   useEffect(() => {
     ApiService.get('/api/certificados/')
@@ -49,19 +53,31 @@ export function CertificadosPage() {
               <div className="curso-card__divider"></div>
               <div className="curso-card__meta" style={{ justifyContent: 'space-between' }}>
                 <span><i className="fa-solid fa-calendar"></i> {new Date(cert.emitido_em).toLocaleDateString('pt-BR')}</span>
-                <a
-                  href={cert.download_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  style={{ color: 'var(--color-accent)', textDecoration: 'none', fontWeight: 600, fontSize: '0.75rem' }}
-                >
-                  <i className="fa-solid fa-download"></i> Download
-                </a>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setSelectedCert(cert); }}
+                    style={{ color: 'var(--color-accent)', background: 'none', border: 'none', textDecoration: 'none', fontWeight: 600, fontSize: '0.75rem', cursor: 'pointer', padding: 0 }}
+                  >
+                    <i className="fa-solid fa-eye"></i> Visualizar
+                  </button>
+                  <a
+                    href={cert.download_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    style={{ color: 'var(--color-accent)', textDecoration: 'none', fontWeight: 600, fontSize: '0.75rem' }}
+                  >
+                    <i className="fa-solid fa-download"></i> Download
+                  </a>
+                </div>
               </div>
             </div>
           ))}
         </div>
+      )}
+
+      {selectedCert && (
+        <CertificadoModal certificado={selectedCert} onClose={() => setSelectedCert(null)} />
       )}
     </div>
   );

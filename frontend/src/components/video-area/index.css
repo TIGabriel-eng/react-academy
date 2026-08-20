@@ -297,6 +297,47 @@
   white-space: nowrap;
 }
 
+/* ── SIDEBAR LESSON TYPE BADGE ── */
+.va-sidebar__lesson-type {
+  font-size: 0.55rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 2px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  line-height: 1;
+  opacity: 0.75;
+}
+.va-sidebar__lesson-type.video { color: #f59e0b; background: rgba(245,158,11,0.12); }
+.va-sidebar__lesson-type.pdf   { color: #ef4444; background: rgba(239,68,68,0.12); }
+.va-sidebar__lesson-type.xls   { color: #10b981; background: rgba(16,185,129,0.12); }
+.va-sidebar__lesson-type.zip   { color: #8b5cf6; background: rgba(139,92,246,0.12); }
+.va-sidebar__lesson-type.link  { color: #3b82f6; background: rgba(59,130,246,0.12); }
+.va-sidebar__lesson-type.default { color: #6b7280; background: rgba(107,114,128,0.12); }
+
+.va-sidebar__lesson--non-video {
+  opacity: 0.85;
+}
+.va-sidebar__lesson--non-video .va-sidebar__lesson-icon {
+  color: #6b7280;
+}
+
+.va-sidebar__module-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  background: rgba(245,158,11,0.15);
+  color: #f59e0b;
+  font-size: 0.6rem;
+  font-weight: 700;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
 /* ── HAMBURGER ── */
 .va-hamburger {
   display: none;
@@ -827,6 +868,33 @@
   padding: 0;
 }
 .va-lesson-info__desc-toggle:hover { color: #60a5fa; }
+
+/* ── INSTRUCTOR NOTES ── */
+.va-instructor-notes {
+  margin: 0 24px;
+  padding: 14px 18px;
+  background: rgba(245, 158, 11, 0.06);
+  border-left: 3px solid #f59e0b;
+  border-radius: 0 8px 8px 0;
+}
+.va-instructor-notes__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: #f59e0b;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.va-instructor-notes__text {
+  color: #d1d5db;
+  font-size: 0.85rem;
+  line-height: 1.65;
+  margin: 0;
+  white-space: pre-wrap;
+}
 
 /* ── TABS SECTION ── */
 .va-tabs-section {
@@ -1487,6 +1555,8 @@
 
   .va-lesson-info { padding: 16px; }
   .va-lesson-info__title { font-size: 1.2rem; }
+
+  .va-instructor-notes { margin: 0 16px; padding: 12px 14px; }
 
   .va-tabs {
     flex-wrap: nowrap;

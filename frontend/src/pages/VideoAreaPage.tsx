@@ -393,6 +393,16 @@ export function VideoAreaPage() {
               />
             )}
 
+            {activeLesson?.material?.observacoes && (
+              <div className="va-instructor-notes">
+                <div className="va-instructor-notes__header">
+                  <i className="fa-solid fa-circle-info" />
+                  <span>Orientações do Instrutor</span>
+                </div>
+                <p className="va-instructor-notes__text">{activeLesson.material.observacoes}</p>
+              </div>
+            )}
+
             <div className="va-tabs-section">
               <div className="va-tabs" role="tablist">
                 <button

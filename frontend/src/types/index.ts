@@ -33,6 +33,7 @@ export interface Material {
   url_externa?: string;
   arquivo_url?: string;
   tamanho?: string;
+  observacoes?: string;
 }
 
 export interface Modulo {
