@@ -45,6 +45,9 @@ function formatTime(seconds: number): string {
   return m + ':' + (s < 10 ? '0' : '') + s;
 }
 
+const VIDEO_CURTO_LIMITE = 180;
+const LIMIAR_LONGO = 0.90;
+
 export function VideoPlayer({ videoUrl, title, cursoId, onProgress, onEnded }: VideoPlayerProps) {
   const videoType = detectVideoType(videoUrl);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -138,7 +141,7 @@ export function VideoPlayer({ videoUrl, title, cursoId, onProgress, onEnded }: V
         const pct = Math.min(100, Math.round((tempoAssistidoRef.current / vid.duration) * 100));
         saveProgress(pct);
         if (onProgress) onProgress(cur, vid.duration);
-        if (tempoAssistidoRef.current / vid.duration >= 0.90) markCompleted();
+        if (vid.duration > VIDEO_CURTO_LIMITE && tempoAssistidoRef.current / vid.duration >= LIMIAR_LONGO) markCompleted();
       }
     };
     const onPlay = () => { setIsPlaying(true); isPlayingRef.current = true; };
@@ -239,7 +242,7 @@ export function VideoPlayer({ videoUrl, title, cursoId, onProgress, onEnded }: V
             const pct = Math.min(100, Math.round((tempoAssistidoRef.current / dur) * 100));
             saveProgress(pct);
             if (onProgress) onProgress(cur, dur);
-            if (tempoAssistidoRef.current / dur >= 0.90) markCompleted();
+            if (dur > VIDEO_CURTO_LIMITE && tempoAssistidoRef.current / dur >= LIMIAR_LONGO) markCompleted();
           }
         } catch {}
       }, 3000);
@@ -353,7 +356,7 @@ export function VideoPlayer({ videoUrl, title, cursoId, onProgress, onEnded }: V
           const pct = Math.min(100, Math.round((tempoAssistidoRef.current / dur) * 100));
           saveProgress(pct);
           if (onProgress) onProgress(cur, dur);
-            if (tempoAssistidoRef.current / dur >= 0.90) markCompleted();
+          if (dur > VIDEO_CURTO_LIMITE && tempoAssistidoRef.current / dur >= LIMIAR_LONGO) markCompleted();
         }
       });
 

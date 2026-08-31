@@ -371,6 +371,7 @@ export function VideoAreaPage() {
           <div className={'va-content' + (mobileTab !== 'video' ? ' hidden-mobile' : '')}>
             {currentVideoUrl ? (
               <VideoPlayer
+                key={currentVideoUrl}
                 videoUrl={currentVideoUrl}
                 title={activeLesson?.material?.titulo || curso.titulo}
                 cursoId={curso.id}
