@@ -285,6 +285,24 @@ export const ApiService = {
     return this.get('/api/modulos/' + moduloId + '/avaliacoes/');
   },
 
+  // Quiz
+  async getQuiz(videoId: number | string) {
+    return this.get('/api/videos/' + videoId + '/quiz/');
+  },
+
+  async submitQuiz(videoId: number | string, respostas: Array<{ pergunta_id: number; alternativa_id: number }>) {
+    return this.post('/api/videos/' + videoId + '/quiz/responder/', { respostas });
+  },
+
+  // Prova final do curso
+  async getProvaFinal(cursoId: number | string) {
+    return this.get('/api/cursos/' + cursoId + '/prova/');
+  },
+
+  async submitProvaFinal(cursoId: number | string, respostas: Array<{ pergunta_id: number; alternativa_id: number }>) {
+    return this.post('/api/cursos/' + cursoId + '/prova/responder/', { respostas });
+  },
+
   async postAvaliacao(moduloId: number | string, data: { modulo?: number | string; nota: number; comentario: string }) {
     return this.post('/api/modulos/' + moduloId + '/avaliacoes/', data);
   },

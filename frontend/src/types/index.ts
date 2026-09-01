@@ -34,6 +34,8 @@ export interface Material {
   arquivo_url?: string;
   tamanho?: string;
   observacoes?: string;
+  tem_quiz?: boolean;
+  quiz_titulo?: string;
 }
 
 export interface Modulo {
@@ -55,6 +57,46 @@ export interface Review {
   usuario_nome?: string;
   usuario_avatar?: string;
   created_at?: string;
+}
+
+export interface AlunoAlternativa {
+  id: number;
+  texto: string;
+}
+
+export interface AlunoPergunta {
+  id: number;
+  enunciado: string;
+  ordem: number;
+  alternativas: AlunoAlternativa[];
+}
+
+export interface AlunoQuiz {
+  id: number;
+  titulo: string;
+  descricao?: string;
+  video_id?: number;
+  curso_id?: number;
+  perguntas: AlunoPergunta[];
+}
+
+export interface ProvaFinal {
+  prova: AlunoQuiz | null;
+  curso_id: number;
+  aprovado: boolean;
+}
+
+export interface QuizResultado {
+  total: number;
+  acertos: number;
+  nota: number;
+  aprovado: boolean;
+  questoes?: Array<{
+    pergunta_id: number;
+    alternativa_id: number;
+    correta_id?: number | null;
+    acertou: boolean;
+  }>;
 }
 
 export interface AulaProgresso {

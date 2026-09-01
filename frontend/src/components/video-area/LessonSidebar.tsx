@@ -149,7 +149,22 @@ export function LessonSidebar({
                         {!isCompleted && !isCurrent && !isLocked && (
                           <span className={'va-sidebar__lesson-type ' + info.typeClass}>{info.label}</span>
                         )}
+                        {isCompleted && (
+                          <span className="va-sidebar__quiz-check">
+                            <i className="fa-solid fa-check" />
+                          </span>
+                        )}
                       </button>
+                      {material.tem_quiz && isVideo && (
+                        <div className="va-sidebar__quiz">
+                          <span className="va-sidebar__quiz-icon">
+                            <i className="fa-solid fa-list-check" />
+                          </span>
+                          <span className="va-sidebar__quiz-title">
+                            {material.quiz_titulo || 'Quiz'}
+                          </span>
+                        </div>
+                      )}
                     </li>
                   );
                 })}

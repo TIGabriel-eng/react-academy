@@ -10,7 +10,8 @@ import { RatingSystem } from '../components/video-area/RatingSystem';
 import { LessonSidebar } from '../components/video-area/LessonSidebar';
 import { MobileTabs } from '../components/video-area/MobileTabs';
 import { ProgressTracker } from '../components/video-area/ProgressTracker';
-import type { Curso, Modulo, Material, Review } from '../types';
+import { QuizSection } from '../components/video-area/QuizSection';
+import type { Curso, Modulo, Material, Review, AlunoQuiz } from '../types';
 
 interface ActiveLesson {
   moduloIdx: number;
@@ -49,6 +50,18 @@ export function VideoAreaPage() {
   const advanceTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const [quizAtual, setQuizAtual] = useState<AlunoQuiz | null>(null);
+  const [showQuiz, setShowQuiz] = useState(false);
+  const quizAtualRef = useRef<AlunoQuiz | null>(null);
+  const quizCarregadoRef = useRef(false);
+  const quizPassadoRef = useRef(false);
+  const fimVideoPendenteRef = useRef(false);
+
+  const [provaAtual, setProvaAtual] = useState<AlunoQuiz | null>(null);
+  const [showProva, setShowProva] = useState(false);
+  const provaCarregadaRef = useRef(false);
+  const provaAprovadaRef = useRef(false);
+
   const salvarProgressoLocalStorage = useCallback((dados: any) => {
     if (!cursoSlug) return;
     ProgressService.salvarProgresso(curso?.id ?? cursoSlug, cursoSlug, dados);
@@ -84,6 +97,43 @@ export function VideoAreaPage() {
     return null;
   }, [activeLesson, modulos]);
 
+  const finalizarCurso = useCallback(() => {
+    setShowProva(false);
+    setShowQuiz(false);
+    setShowCourseCompleteModal(true);
+    if (curso?.id) {
+      ApiService.concluirCurso(curso.id).catch((err) => {
+        console.error('Erro ao concluir curso:', err);
+      });
+    }
+  }, [curso?.id]);
+
+  const verificarProvaFinal = useCallback(() => {
+    if (!curso?.id || provaCarregadaRef.current) return;
+    provaCarregadaRef.current = true;
+    ApiService.getProvaFinal(curso.id)
+      .then((data: any) => {
+        const prova = data?.prova || null;
+        const jaAprovado = !!data?.aprovado;
+        if (prova && !jaAprovado) {
+          provaAprovadaRef.current = false;
+          setProvaAtual(prova);
+          setShowProva(true);
+        } else {
+          provaAprovadaRef.current = jaAprovado;
+          setProvaAtual(null);
+          setShowProva(false);
+          finalizarCurso();
+        }
+      })
+      .catch(() => {
+        provaAprovadaRef.current = false;
+        setProvaAtual(null);
+        setShowProva(false);
+        finalizarCurso();
+      });
+  }, [curso?.id, finalizarCurso]);
+
   const avancarParaProximaAula = useCallback(() => {
     const next = findNextLesson();
     if (next) {
@@ -96,11 +146,11 @@ export function VideoAreaPage() {
       setMobileTab('video');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
-      setShowCourseCompleteModal(true);
+      verificarProvaFinal();
     }
-  }, [findNextLesson]);
+  }, [findNextLesson, verificarProvaFinal]);
 
-  const marcarAulaComoConcluida = useCallback((moduloIdx: number, aulaIdx: number) => {
+  const marcarAulaComoConcluida = useCallback((moduloIdx: number, aulaIdx: number, autoAvancar: boolean = true) => {
     const key = moduloIdx + '-' + aulaIdx;
 
     if (completedLessons.has(key)) return;
@@ -138,22 +188,19 @@ export function VideoAreaPage() {
 
     showToastMsg('Etapa Concluída!', 5000);
 
-    if (advanceTimeoutRef.current) {
-      clearTimeout(advanceTimeoutRef.current);
+    if (autoAvancar) {
+      if (advanceTimeoutRef.current) {
+        clearTimeout(advanceTimeoutRef.current);
+      }
+      advanceTimeoutRef.current = setTimeout(() => {
+        avancarParaProximaAula();
+      }, 5000);
     }
-    advanceTimeoutRef.current = setTimeout(() => {
-      avancarParaProximaAula();
-    }, 5000);
 
     if (isComplete && !cursoJaConcluidoRef.current) {
       cursoJaConcluidoRef.current = true;
-      if (curso?.id) {
-        ApiService.concluirCurso(curso.id).catch((err) => {
-          console.error('Erro ao concluir curso:', err);
-        });
-      }
     }
-  }, [modulos, completedLessons, salvarProgressoLocalStorage, showToastMsg, avancarParaProximaAula, activeLesson, curso]);
+  }, [modulos, completedLessons, salvarProgressoLocalStorage, showToastMsg, avancarParaProximaAula, activeLesson]);
 
   // Recalcular progresso quando completedLessons mudar
   useEffect(() => {
@@ -268,10 +315,85 @@ export function VideoAreaPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [modulos]);
 
+  const processarFimDeVideo = useCallback(() => {
+    if (!activeLesson) return;
+    const temQuiz = !!quizAtualRef.current;
+    const jaPassou = quizPassadoRef.current;
+
+    if (temQuiz && !jaPassou) {
+      marcarAulaComoConcluida(activeLesson.moduloIdx, activeLesson.aulaIdx, false);
+      setShowQuiz(true);
+      setMobileTab('video');
+      if (advanceTimeoutRef.current) {
+        clearTimeout(advanceTimeoutRef.current);
+        advanceTimeoutRef.current = null;
+      }
+    } else {
+      marcarAulaComoConcluida(activeLesson.moduloIdx, activeLesson.aulaIdx, true);
+      setShowQuiz(false);
+    }
+  }, [activeLesson, marcarAulaComoConcluida]);
+
   const handleVideoEnded = useCallback(() => {
     if (!activeLesson) return;
-    marcarAulaComoConcluida(activeLesson.moduloIdx, activeLesson.aulaIdx);
-  }, [activeLesson, marcarAulaComoConcluida]);
+    if (quizCarregadoRef.current) {
+      processarFimDeVideo();
+    } else {
+      fimVideoPendenteRef.current = true;
+    }
+  }, [activeLesson, processarFimDeVideo]);
+
+  const handleQuizPassed = useCallback(() => {
+    quizPassadoRef.current = true;
+    if (advanceTimeoutRef.current) {
+      clearTimeout(advanceTimeoutRef.current);
+      advanceTimeoutRef.current = null;
+    }
+    avancarParaProximaAula();
+  }, [avancarParaProximaAula]);
+
+  const handleQuizAbort = useCallback(() => {
+    setShowQuiz(false);
+  }, []);
+
+  const handleProvaPassed = useCallback(() => {
+    provaAprovadaRef.current = true;
+    finalizarCurso();
+  }, [finalizarCurso]);
+
+  useEffect(() => {
+    if (!activeLesson) return;
+    const videoId = activeLesson.material.id;
+
+    quizAtualRef.current = null;
+    quizPassadoRef.current = false;
+    quizCarregadoRef.current = false;
+    fimVideoPendenteRef.current = false;
+    setQuizAtual(null);
+    setShowQuiz(false);
+    if (advanceTimeoutRef.current) {
+      clearTimeout(advanceTimeoutRef.current);
+      advanceTimeoutRef.current = null;
+    }
+
+    ApiService.getQuiz(videoId)
+      .then((data: any) => {
+        const quiz = data?.quiz || null;
+        quizAtualRef.current = quiz;
+        setQuizAtual(quiz);
+      })
+      .catch(() => {
+        quizAtualRef.current = null;
+        setQuizAtual(null);
+      })
+      .finally(() => {
+        quizCarregadoRef.current = true;
+        if (fimVideoPendenteRef.current) {
+          fimVideoPendenteRef.current = false;
+          processarFimDeVideo();
+        }
+      });
+  }, [activeLesson, processarFimDeVideo]);
 
   const handlePostReview = useCallback(async (nota: number, comentario: string) => {
     if (!activeLesson?.modulo?.id) return;
@@ -369,7 +491,17 @@ export function VideoAreaPage() {
           <MobileTabs activeTab={mobileTab} onTabChange={setMobileTab} />
 
           <div className={'va-content' + (mobileTab !== 'video' ? ' hidden-mobile' : '')}>
-            {currentVideoUrl ? (
+            {showQuiz && activeLesson && quizAtual ? (
+              <div className="va-quiz-stage">
+                <QuizSection
+                  key={activeLesson.material.id}
+                  videoId={activeLesson.material.id}
+                  quiz={quizAtual}
+                  onPassed={handleQuizPassed}
+                  onAbort={handleQuizAbort}
+                />
+              </div>
+            ) : currentVideoUrl ? (
               <VideoPlayer
                 key={currentVideoUrl}
                 videoUrl={currentVideoUrl}
@@ -384,7 +516,7 @@ export function VideoAreaPage() {
               </div>
             )}
 
-            {activeLesson && (
+            {!showQuiz && activeLesson && (
               <LessonInfo
                 curso={curso}
                 tituloAula={activeLesson.material.titulo}
@@ -394,7 +526,7 @@ export function VideoAreaPage() {
               />
             )}
 
-            {activeLesson?.material?.observacoes && (
+            {!showQuiz && activeLesson?.material?.observacoes && (
               <div className="va-instructor-notes">
                 <div className="va-instructor-notes__header">
                   <i className="fa-solid fa-circle-info" />
@@ -402,6 +534,15 @@ export function VideoAreaPage() {
                 </div>
                 <p className="va-instructor-notes__text">{activeLesson.material.observacoes}</p>
               </div>
+            )}
+
+            {showProva && provaAtual && curso?.id && (
+              <QuizSection
+                cursoId={curso.id}
+                mode="prova"
+                quiz={provaAtual}
+                onPassed={handleProvaPassed}
+              />
             )}
 
             <div className="va-tabs-section">
@@ -542,18 +683,30 @@ export function VideoAreaPage() {
 
       {showCourseCompleteModal && (
         <div className="va-complete-modal-overlay" onClick={() => setShowCourseCompleteModal(false)}>
-          <div className="va-complete-modal" onClick={(e) => e.stopPropagation()}>
-            <button className="va-complete-modal__close" onClick={() => setShowCourseCompleteModal(false)}>
-              ✕
+          <div className="va-complete-modal" role="dialog" aria-modal="true" aria-label="Curso concluído" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="va-complete-modal__close"
+              aria-label="Fechar"
+              onClick={() => setShowCourseCompleteModal(false)}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 6 6 18M6 6l12 12" />
+              </svg>
             </button>
-            <h2 className="va-complete-modal__title">🎉 Parabéns!</h2>
-            <p className="va-complete-modal__text">Você concluiu este curso!</p>
+            <div className="va-complete-modal__badge">
+              <i className="fa-solid fa-trophy" />
+            </div>
+            <h2 className="va-complete-modal__title">Parabéns!</h2>
+            <p className="va-complete-modal__text">
+              Você concluiu este curso com sucesso. Continue evoluindo!
+            </p>
             <div className="va-complete-modal__actions">
               <button className="va-btn-accent" onClick={() => { setShowCourseCompleteModal(false); navigate('/meus-cursos'); }}>
-                Voltar aos Cursos
+                <i className="fa-solid fa-book-open" /> Voltar aos Meus Cursos
               </button>
               <button className="va-btn-ghost" onClick={() => setShowCourseCompleteModal(false)}>
-                Revisar Aula
+                <i className="fa-solid fa-rotate-left" /> Revisar Aula
               </button>
             </div>
           </div>
