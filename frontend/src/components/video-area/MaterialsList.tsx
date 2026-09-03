@@ -4,13 +4,31 @@ interface MaterialsListProps {
   materiais: Material[];
 }
 
-function getFileExtension(modalidade?: string): string {
-  return (modalidade || 'pdf').toUpperCase();
+function getExtensionFromUrl(url: string): string {
+  try {
+    const path = new URL(url).pathname;
+    const match = path.match(/\.([a-zA-Z0-9]+)$/);
+    if (match) return match[1].toLowerCase();
+  } catch {
+    const match = url.split('?')[0].match(/\.([a-zA-Z0-9]+)$/);
+    if (match) return match[1].toLowerCase();
+  }
+  return '';
+}
+
+function getFileExtension(mat: Material): string {
+  const fromUrl = mat.arquivo_url ? getExtensionFromUrl(mat.arquivo_url) : '';
+  if (fromUrl) return fromUrl.toUpperCase();
+  return (mat.modalidade || 'pdf').toUpperCase();
 }
 
 function getFileClass(ext: string): string {
-  if (ext === 'XLS' || ext === 'XLSX') return 'xls';
-  if (ext === 'ZIP') return 'zip';
+  const e = ext.toLowerCase();
+  if (['xls', 'xlsx', 'csv'].includes(e)) return 'xls';
+  if (e === 'zip') return 'zip';
+  if (['ppt', 'pptx'].includes(e)) return 'ppt';
+  if (['doc', 'docx', 'rtf', 'odt', 'word'].includes(e)) return 'word';
+  if (['png', 'jpg', 'jpeg', 'webp'].includes(e)) return 'img';
   return 'pdf';
 }
 
@@ -31,7 +49,7 @@ export function MaterialsList({ materiais }: MaterialsListProps) {
   return (
     <div className="va-materials-list">
       {downloadables.map((mat) => {
-        const ext = getFileExtension(mat.modalidade);
+        const ext = getFileExtension(mat);
         const cls = getFileClass(ext);
         return (
           <div key={mat.id} className="va-material-item">
