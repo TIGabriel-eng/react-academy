@@ -174,6 +174,9 @@ export function Layout() {
         <Topbar onMenuToggle={handleMenuToggle} onSearchOpen={handleSearchOpen} showSearch={showSearch} showProfile={showProfileInTopbar} />
         <main className="main-content" id="mainContent" style={{ flex: 1, overflowY: 'auto' }}>
           <Outlet />
+          <footer className="frontend-footer">
+            <p>&copy; 2026 Orcoma Academy. Todos os direitos reservados. Desenvolvido pelos desenvolvedores da <span>Orcoma Contabilidade</span> - <span>G</span>.</p>
+          </footer>
         </main>
       </div>
       {showRightPanel && <RightPanel />}

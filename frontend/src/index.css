@@ -3461,6 +3461,17 @@ ul { list-style: none; }
   padding: 16px;
 }
 
+.frontend-footer {
+  margin-top: auto;
+  padding: 18px 8px 4px;
+  color: var(--color-text-muted, #8292ad);
+  text-align: center;
+  font-size: 12px;
+}
+
+.frontend-footer p { margin: 0; }
+.frontend-footer span { color: #7cc7ff; }
+
 /* ============================================================
    ANTI COPY
    ============================================================ */
