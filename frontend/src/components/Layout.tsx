@@ -95,10 +95,46 @@ export function Layout() {
     if (slug) navigate('/video-area/' + slug);
   };
 
+  const svgProps = { width: 20, height: 20, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
+  const searchIcons: Record<string, JSX.Element> = {
+    // medalha com estrela: destaque / recomendado
+    recomendado: (
+      <svg {...svgProps}>
+        <circle cx="12" cy="9" r="6" />
+        <path d="m12 6.6.9 1.8 2 .3-1.45 1.4.35 2-1.8-.95-1.8.95.35-2L9.1 8.7l2-.3z" />
+        <path d="m8.6 14 -1.6 7 5-2.6 5 2.6-1.6-7" />
+      </svg>
+    ),
+    // capelo: curso
+    curso: (
+      <svg {...svgProps}>
+        <path d="M22 9 12 4 2 9l10 5 10-5Z" />
+        <path d="M6 11.2V16c0 1.2 2.7 3 6 3s6-1.8 6-3v-4.8" />
+        <path d="M22 9v6" />
+      </svg>
+    ),
+    // percurso com marcadores: trilha
+    trilha: (
+      <svg {...svgProps}>
+        <circle cx="6" cy="19" r="2.2" />
+        <circle cx="18" cy="5" r="2.2" />
+        <path d="M8.2 19H15a3.5 3.5 0 0 0 0-7H9a3.5 3.5 0 0 1 0-7h6.8" />
+      </svg>
+    ),
+    // calendário: evento
+    evento: (
+      <svg {...svgProps}>
+        <rect x="3.5" y="5" width="17" height="15.5" rx="2.5" />
+        <path d="M3.5 10h17M8 3v4M16 3v4" />
+        <circle cx="12" cy="15" r="1.3" fill="currentColor" stroke="none" />
+      </svg>
+    ),
+  };
+
   const renderSearchCard = (item: { type: string; icon: string; iconBg: string; iconColor: string; title: string; meta: string; slug?: string }) => (
     <div key={item.type + '-' + item.title} className="search-modal__card" onClick={() => handleResultClick(item.type, item.slug)}>
       <div className="search-modal__card-icon" style={{ background: item.iconBg, color: item.iconColor, width: 40, height: 40, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-        <i className={item.icon}></i>
+        {searchIcons[item.type] ?? <i className={item.icon}></i>}
       </div>
       <div style={{ minWidth: 0 }}>
         <div className="search-modal__card-title">{item.title}</div>

@@ -53,7 +53,7 @@ export function NotificacoesPage() {
   };
 
   return (
-    <div style={{ padding: '24px', maxWidth: '800px', margin: '0 auto' }}>
+    <div style={{ width: '100%', maxWidth: '1600px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <h1 style={{ fontFamily: "var(--font-display)", fontSize: '1.6rem', fontWeight: 700 }}>Notificações</h1>
         {notificacoes.some((n) => !n.lida) && (

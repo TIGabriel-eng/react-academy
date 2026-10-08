@@ -12,7 +12,20 @@ interface TopbarProps {
 }
 
 export function Topbar({ onMenuToggle, onSearchOpen, showSearch, showProfile }: TopbarProps) {
-  const [theme] = useState(localStorage.getItem('theme') || 'dark');
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
+
+  const toggleTheme = () => {
+    const next = theme === 'light' ? 'dark' : 'light';
+    setTheme(next);
+    localStorage.setItem('theme', next);
+    window.dispatchEvent(new Event('theme-change'));
+  };
+
+  useEffect(() => {
+    const sync = () => setTheme(localStorage.getItem('theme') || 'dark');
+    window.addEventListener('theme-change', sync);
+    return () => window.removeEventListener('theme-change', sync);
+  }, []);
   const [userName, setUserName] = useState(AuthService.getName());
   const [avatar, setAvatar] = useState(AuthService.getAvatar());
   const [role, setRole] = useState(AuthService.getRole());
@@ -91,6 +104,14 @@ export function Topbar({ onMenuToggle, onSearchOpen, showSearch, showProfile }: 
       )}
 
       <div className="topbar__actions">
+        <button
+          className="topbar__icon-btn"
+          aria-label={theme === 'light' ? 'Ativar modo escuro' : 'Ativar modo claro'}
+          title={theme === 'light' ? 'Modo escuro' : 'Modo claro'}
+          onClick={toggleTheme}
+        >
+          <i className={theme === 'light' ? 'fa-solid fa-moon' : 'fa-solid fa-sun'}></i>
+        </button>
         <div style={{ position: 'relative' }}>
           <button className="topbar__icon-btn" aria-label="Notificações" onClick={() => setNotifOpen(!notifOpen)}>
             <i className="fa-regular fa-bell"></i>

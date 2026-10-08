@@ -297,8 +297,11 @@ ul { list-style: none; }
   transition: box-shadow 0.2s ease;
 }
 
-.topbar-profile__trigger:hover {
-  box-shadow: 0 0 0 2px var(--color-accent);
+.topbar-profile__trigger:hover,
+.topbar-profile__trigger:focus,
+.topbar-profile__trigger:focus-visible {
+  box-shadow: none;
+  outline: none;
 }
 
 .topbar-profile__avatar {
@@ -306,7 +309,7 @@ ul { list-style: none; }
   height: 42px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid var(--color-accent);
+  border: none;
 }
 
 .topbar-profile__details {
@@ -333,7 +336,7 @@ ul { list-style: none; }
 .topbar-profile--desktop .topbar-profile__avatar {
   width: 57.75px;
   height: 57.75px;
-  border: 2.31px solid var(--color-accent);
+  border: none;
 }
 
 /* ============================================================
@@ -1746,6 +1749,27 @@ ul { list-style: none; }
   transition: stroke-dashoffset 1.5s ease;
 }
 
+/* Efeito 3D: luz de cima sobre o arco e a trilha, com sombra nítida projetada */
+.progress__ring-sheen,
+.progress__ring-bg-sheen {
+  fill: none;
+  stroke: url(#ringSheen);
+  stroke-width: 9.24;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1.5s ease;
+}
+.progress__ring-bg-sheen { opacity: 0.55; stroke-linecap: butt; }
+
+.progress__ring {
+  overflow: visible;
+  filter: drop-shadow(0 3px 2px rgba(0, 0, 0, 0.55));
+}
+.progress__ring-bg { stroke: #1b2438; }
+.progress__ring-fill { filter: drop-shadow(0 0 1.5px rgba(255, 255, 255, 0.25)); }
+
+body.light-mode .progress__ring { filter: drop-shadow(0 3px 2px rgba(13, 27, 46, 0.3)); }
+body.light-mode .progress__ring-bg { stroke: #d6e2f2; }
+
 .progress__circle-text {
   position: absolute;
   inset: 0;
@@ -2121,6 +2145,29 @@ ul { list-style: none; }
   background: var(--color-accent-2);
   border-radius: var(--radius-full);
   transition: width .6s ease;
+}
+
+/* Barra de progresso 3D: trilha em sulco, preenchimento com volume e luz de cima */
+.continuar-card__bar {
+  background: #0c1424;
+  box-shadow:
+    inset 0 2px 3px rgba(0, 0, 0, 0.6),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.06),
+    0 1px 0 rgba(255, 255, 255, 0.05);
+}
+.continuar-card__bar-fill {
+  background: linear-gradient(180deg, #7bb2ff 0%, #3b82f6 45%, #1d4ed8 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -2px 2px rgba(0, 20, 90, 0.45),
+    0 1px 3px rgba(0, 0, 0, 0.5);
+}
+body.light-mode .continuar-card__bar {
+  background: #cfdcee;
+  box-shadow:
+    inset 0 2px 3px rgba(13, 27, 46, 0.28),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.7),
+    0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .continuar-card__percent {
@@ -3487,6 +3534,60 @@ ul { list-style: none; }
   padding: 16px;
 }
 
+/* Páginas de ambiente (AmbientePage): largura total, sem mexer na posição dos elementos */
+.ambiente-wide {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  min-width: 0;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+.ambiente-wide .continuar-card { width: 100%; }
+@media (min-width: 1024px) {
+  .ambiente-wide .hero-row .hero { flex: 1 1 0; max-width: none; }
+}
+/* Mobile (ex.: 390x600): leão abaixo do texto, sem sobreposição, e card de curso sem estourar */
+@media (max-width: 767px) {
+  .ambiente-wide .hero-row .hero { max-height: none; flex: none; width: 100%; }
+  .ambiente-wide .hero__welcome p { font-size: 14px !important; }
+  .ambiente-wide .hero__welcome .tag-env { font-size: 13px !important; padding: 2px 10px !important; }
+  .ambiente-wide .hero-welcome-img {
+    position: static;
+    order: 2;
+    align-self: center;
+    max-width: 70%;
+    max-height: 220px;
+    margin: 4px 0 -16px;
+  }
+  .ambiente-wide .hero-stats { flex: none; width: 100%; min-width: 0; }
+  .ambiente-wide .continuar-card { width: 100%; height: auto; }
+  .ambiente-wide .continuar-card__thumb { min-width: 0; width: 100%; height: 170px; }
+  .ambiente-wide .continuar-card__thumb img { object-fit: cover; }
+  .ambiente-wide .continuar-card__btn { width: 100%; justify-content: center; }
+
+  /* Cursos disponíveis */
+  .ambiente-wide .cursos-grid { flex-direction: column; flex-wrap: nowrap; }
+  .ambiente-wide .curso-card { width: 100%; min-width: 0; }
+  .ambiente-wide .curso-card__image { height: 130px; }
+  .ambiente-wide .curso-card__image img { width: 100%; height: 100%; object-fit: cover; }
+  .ambiente-wide .curso-card__meta span { font-size: 12px; }
+
+  /* Barra de métricas: 2x2 em vez de 4 colunas cortadas */
+  .ambiente-wide .stats-bar { display: grid; grid-template-columns: 1fr 1fr; }
+  .ambiente-wide .stat-item { min-width: 0; padding: 14px 12px; gap: 10px; }
+  .ambiente-wide .stat-item::after { display: none; }
+  .ambiente-wide .stat-item:nth-child(odd) { border-right: 1px solid rgba(255,255,255,.06); }
+  .ambiente-wide .stat-item:nth-child(-n+2) { border-bottom: 1px solid rgba(255,255,255,.06); }
+}
+/* Monitores menores: dá mais largura ao texto e deixa o card crescer em altura em vez de cortar */
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .ambiente-wide .hero-row .hero { max-height: none; min-height: 310px; }
+  .ambiente-wide .hero__welcome { flex: 0 0 62%; }
+  .ambiente-wide .hero__welcome h1 { font-size: clamp(20px, 2.6vw, 34px) !important; }
+}
+
 .frontend-footer {
   margin-top: auto;
   padding: 18px 8px 4px;
@@ -3601,6 +3702,120 @@ body.light-mode .section-tittle {
 body.light-mode .progress-sidebar__username {
   color: #0d1b2e;
 }
+
+/* ---- Light mode: tokens + superfícies (mantém sidebar e banners escuros como identidade) ---- */
+body.light-mode {
+  --color-bg: #E6F1FB;
+  --color-surface: #ffffff;
+  --color-surface-2: #eaf1fa;
+  --color-border: #d3e0f0;
+  --color-text-primary: #0d1b2e;
+  --color-text-secondary: #4a5d78;
+  --color-text-muted: #6b7d96;
+}
+
+/* A sidebar continua escura (logo é branca): restaura os tokens escuros dentro dela */
+body.light-mode .sidebar {
+  --color-bg: #07111F;
+  --color-surface: #111827;
+  --color-surface-2: #1a2235;
+  --color-border: #1e2d45;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #8b9ab5;
+  --color-text-muted: #4a5568;
+  color: #ffffff;
+}
+
+/* Contêineres que seguem escuros no modo claro (banners, modais, cards de perfil/configurações) */
+body.light-mode .hero,
+body.light-mode .hero__carousel,
+body.light-mode [class*="modal"],
+body.light-mode .profile-card,
+body.light-mode .settings-card,
+body.light-mode .sobre-composer,
+body.light-mode .formacao-item,
+body.light-mode .login-page {
+  --color-bg: #07111F;
+  --color-surface: #111827;
+  --color-surface-2: #1a2235;
+  --color-border: #1e2d45;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #8b9ab5;
+  --color-text-muted: #4a5568;
+  color: #ffffff;
+}
+
+body.light-mode .topbar { background: var(--color-bg); }
+body.light-mode .topbar__search,
+body.light-mode .topbar__icon-btn { background: #ffffff; border-color: var(--color-border); }
+body.light-mode .topbar-profile__details { color: #0d1b2e; }
+body.light-mode .topbar-profile__details * { color: inherit; }
+body.light-mode .topbar-profile__details [class*="role"],
+body.light-mode .topbar-profile__details small { color: #c0392b; }
+
+body.light-mode .section__title,
+body.light-mode .section-tittle,
+body.light-mode .section-header h2,
+body.light-mode .learning-paths__title,
+body.light-mode .section-tittle * { color: #0d1b2e; opacity: 1; }
+body.light-mode .section__link { color: #2563eb; }
+
+/* Cards de ambiente / cursos / trilhas */
+body.light-mode .curso-card,
+body.light-mode .ambiente-card,
+body.light-mode .trail-card,
+body.light-mode .continuar-card {
+  background: #ffffff;
+  border-color: var(--color-border);
+  box-shadow: 0 2px 10px rgba(13, 27, 46, 0.06);
+}
+body.light-mode .curso-card:hover,
+body.light-mode .ambiente-card:hover { box-shadow: 0 10px 25px rgba(37, 99, 235, 0.18); border-color: rgba(37, 99, 235, 0.45); }
+body.light-mode .curso-card__name,
+body.light-mode .ambiente-card__info h3,
+body.light-mode .trail-card,
+body.light-mode .trail-card *,
+body.light-mode .continuar-card__title { color: #0d1b2e; }
+body.light-mode .trail-card__icon { background: rgba(37, 99, 235, 0.12); }
+body.light-mode .trail-card__icon i { color: #2563eb; }
+body.light-mode .curso-card__divider,
+body.light-mode .ambiente-card__divider { background: var(--color-border); }
+body.light-mode .curso-card__meta { color: var(--color-text-muted); }
+body.light-mode .ambiente-card__desc { color: var(--color-text-secondary); }
+body.light-mode .continuar-card__tag,
+body.light-mode .continuar-card__progress-label { color: var(--color-text-muted); }
+body.light-mode .continuar-card__bar { background: #dbe6f4; }
+body.light-mode .continuar-card__percent { color: #0d1b2e; }
+
+/* Barra de métricas */
+body.light-mode .stats-bar { background: #ffffff; border-color: var(--color-border); box-shadow: 0 2px 10px rgba(13, 27, 46, 0.06); }
+body.light-mode .stat-item:not(:last-child) { border-right-color: var(--color-border); }
+body.light-mode .stat-item__number { color: #0d1b2e; }
+body.light-mode .stat-item p { color: var(--color-text-secondary); }
+
+/* Painel direito: progresso e eventos */
+body.light-mode .progress-sidebar,
+body.light-mode .events-sidebar {
+  background: #ffffff;
+  border-color: var(--color-border);
+  box-shadow: 0 2px 10px rgba(13, 27, 46, 0.06);
+}
+body.light-mode .progress-sidebar *:not(svg):not(circle):not(path),
+body.light-mode .events-header h3,
+body.light-mode .events-list__title,
+body.light-mode .events-list__day { color: #0d1b2e; }
+body.light-mode .events-list__item { background: #f4f8fd; border-color: var(--color-border); }
+body.light-mode .events-list__time,
+body.light-mode .events-list__arrow,
+body.light-mode .events-empty i,
+body.light-mode .events-empty p,
+body.light-mode .events-link { color: var(--color-text-secondary); }
+body.light-mode .events-link:hover { color: #0d1b2e; }
+
+/* Rodapé e botão voltar */
+body.light-mode .frontend-footer { color: var(--color-text-secondary); }
+body.light-mode .btn-voltar { background: #ffffff; color: #0d1b2e; border-color: var(--color-border); }
+body.light-mode .btn-voltar:hover { background: #eaf1fa; border-color: #2563eb; }
 
 /* ============================================================
    PROFILE PAGE

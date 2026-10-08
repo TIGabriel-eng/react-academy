@@ -187,7 +187,7 @@ export function AmbientePage() {
   };
 
   return (
-    <>
+    <div className="ambiente-wide">
       <a href={config.backTo} className="btn-voltar" onClick={(e) => { e.preventDefault(); navigate(config.backTo); }}>
         <i className="fa-solid fa-arrow-left"></i> {config.backLabel}
       </a>
@@ -396,6 +396,6 @@ export function AmbientePage() {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

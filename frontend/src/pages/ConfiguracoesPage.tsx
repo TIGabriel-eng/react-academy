@@ -17,10 +17,17 @@ export function ConfiguracoesPage() {
     }
   }, [theme]);
 
+  useEffect(() => {
+    const sync = () => setTheme(localStorage.getItem('theme') || 'dark');
+    window.addEventListener('theme-change', sync);
+    return () => window.removeEventListener('theme-change', sync);
+  }, []);
+
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
+    window.dispatchEvent(new Event('theme-change'));
   };
 
   return (
