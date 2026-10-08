@@ -549,16 +549,6 @@ export function VideoPlayer({ videoUrl, title, cursoId, onProgress, onEnded }: V
     return () => window.removeEventListener('keydown', handleKey);
   }, [togglePlay, toggleFullscreen, toggleMute, showControlsTemporarily, videoType, duration]);
 
-  const pauseVideo = useCallback(() => {
-    if (videoType === 'html5' && videoRef.current) {
-      videoRef.current.pause();
-    } else if (videoType === 'youtube' && ytPlayerRef.current) {
-      try { ytPlayerRef.current.pauseVideo(); } catch {}
-    } else if (videoType === 'vimeo' && vimeoPlayerRef.current) {
-      try { vimeoPlayerRef.current.pause(); } catch {}
-    }
-  }, [videoType]);
-
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (isPlaying) {

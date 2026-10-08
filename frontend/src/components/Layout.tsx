@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, type ReactElement } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { AuthService } from '../services/auth';
 import { ApiService } from '../services/api';
@@ -96,7 +96,7 @@ export function Layout() {
   };
 
   const svgProps = { width: 20, height: 20, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
-  const searchIcons: Record<string, JSX.Element> = {
+  const searchIcons: Record<string, ReactElement> = {
     // medalha com estrela: destaque / recomendado
     recomendado: (
       <svg {...svgProps}>
