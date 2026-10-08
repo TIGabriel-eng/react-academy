@@ -24,6 +24,8 @@ export function LoginPage() {
   const [recoveryEmail, setRecoveryEmail] = useState('');
   const [recoveryMsg, setRecoveryMsg] = useState('');
   const [recoveryLoading, setRecoveryLoading] = useState(false);
+  const [recoveryContas, setRecoveryContas] = useState<{ id: number; empresa: string }[]>([]);
+  const [recoveryUserId, setRecoveryUserId] = useState<number | null>(null);
 
   const [toast, setToast] = useState('');
 
@@ -159,14 +161,32 @@ export function LoginPage() {
     }
   };
 
+  const closeRecovery = () => {
+    setRecoveryOpen(false);
+    setRecoveryContas([]);
+    setRecoveryUserId(null);
+  };
+
   const handleRecovery = async (e: React.FormEvent) => {
     e.preventDefault();
     setRecoveryMsg('');
+    if (recoveryContas.length > 0 && recoveryUserId === null) {
+      setRecoveryMsg('Selecione uma empresa para continuar.');
+      return;
+    }
     setRecoveryLoading(true);
     try {
-      await ApiService.post('/api/password-reset/', { email: recoveryEmail });
+      const payload: { email: string; user_id?: number } = { email: recoveryEmail };
+      if (recoveryUserId !== null) payload.user_id = recoveryUserId;
+      const data = await ApiService.post('/api/password-reset/', payload);
+      if (Array.isArray(data?.contas) && data.contas.length > 0) {
+        setRecoveryContas(data.contas);
+        return;
+      }
       setRecoveryMsg('Verifique sua caixa de entrada! Enviamos as instruções para o seu e-mail.');
       setRecoveryEmail('');
+      setRecoveryContas([]);
+      setRecoveryUserId(null);
     } catch {
       setRecoveryMsg('Erro ao enviar. Tente novamente.');
     } finally {
@@ -315,20 +335,43 @@ export function LoginPage() {
       </div>
 
       {recoveryOpen && (
-        <div className="recovery-modal active" onClick={(e) => { if (e.target === e.currentTarget) setRecoveryOpen(false); }}>
+        <div className="recovery-modal active" onClick={(e) => { if (e.target === e.currentTarget) closeRecovery(); }}>
           <div className="recovery-box">
-            <button className="close-modal" onClick={() => setRecoveryOpen(false)}>&times;</button>
+            <button className="close-modal" onClick={closeRecovery}>&times;</button>
             <h2>Recupere sua senha</h2>
-            <p>Informe seu e-mail cadastrado para receber as instruções de redefinição de senha.</p>
+            {recoveryContas.length === 0 ? (
+              <p>Informe seu e-mail cadastrado para receber as instruções de redefinição de senha.</p>
+            ) : (
+              <p>
+                {recoveryContas.length} empresas foram localizadas com o seu endereço de e-mail.
+                Qual delas deseja redefinir?
+              </p>
+            )}
             <form onSubmit={handleRecovery}>
-              <input
-                type="email"
-                placeholder="Seu e-mail"
-                className="recovery-input"
-                value={recoveryEmail}
-                onChange={(e) => setRecoveryEmail(e.target.value)}
-                required
-              />
+              {recoveryContas.length === 0 ? (
+                <input
+                  type="email"
+                  placeholder="Seu e-mail"
+                  className="recovery-input"
+                  value={recoveryEmail}
+                  onChange={(e) => setRecoveryEmail(e.target.value)}
+                  required
+                />
+              ) : (
+                <div className="recovery-contas">
+                  {recoveryContas.map((conta) => (
+                    <label key={conta.id} className="recovery-conta">
+                      <input
+                        type="radio"
+                        name="recovery-conta"
+                        checked={recoveryUserId === conta.id}
+                        onChange={() => setRecoveryUserId(conta.id)}
+                      />
+                      <span>{conta.empresa}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
               <button type="submit" className="recovery-btn" disabled={recoveryLoading}>
                 {recoveryLoading ? 'Enviando...' : 'Enviar instruções'}
               </button>

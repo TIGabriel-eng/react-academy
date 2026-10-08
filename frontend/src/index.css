@@ -2769,6 +2769,32 @@ ul { list-style: none; }
   border-color: var(--color-accent);
 }
 
+.recovery-contas {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.recovery-conta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 15px;
+  border-radius: 12px;
+  border: 1px solid #1e3a8a;
+  background: #06111f;
+  color: #fff;
+  font-family: var(--font-body);
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.recovery-conta:has(input:checked) {
+  border-color: var(--color-accent);
+}
+
 .recovery-btn {
   width: 100%;
   height: 50px;
