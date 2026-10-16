@@ -18,6 +18,7 @@ interface CertificadoISOProps {
   gestorCargo?: string;
   logoUrl?: string;
   seloUrl?: string;
+  preview?: boolean;
 }
 
 export default function CertificadoISO({
@@ -29,6 +30,7 @@ export default function CertificadoISO({
   dataEmissao = "",
   logoUrl = "",
   seloUrl = "",
+  preview = false,
 }: CertificadoISOProps) {
   const certRef = useRef<HTMLDivElement>(null);
 
@@ -223,6 +225,7 @@ export default function CertificadoISO({
         </div>
       </div>
 
+      {!preview && (
       <button
         onClick={handleExportar}
         style={{
@@ -252,6 +255,7 @@ export default function CertificadoISO({
         <i className="fa-solid fa-download" />
         Exportar como imagem
       </button>
+      )}
     </div>
   );
 }

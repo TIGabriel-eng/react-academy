@@ -57,7 +57,7 @@ export function NotificationPanel({ open, onClose }: NotificationPanelProps) {
   const getIcon = (tipo: string) => {
     switch (tipo) {
       case 'boas_vindas': return 'fa-solid fa-hand-wave';
-      case 'curso_concluido': return 'fa-solid fa-certificate';
+      case 'curso_concluido': return 'fa-solid fa-award';
       case 'evento': return 'fa-regular fa-calendar-check';
       default: return 'fa-regular fa-bell';
     }

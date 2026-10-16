@@ -1,5 +1,23 @@
 import { useEffect } from "react";
 import CertificadoISO from "./CertificadoISO";
+import CertificadoPadrao from "./CertificadoPadrao";
+
+export function formatarData(valor?: string) {
+  if (!valor) return "";
+  // A API envia "dd/mm/aaaa HH:MM"; também aceita formato ISO.
+  const br = valor.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+  if (br) return `${br[1]}/${br[2]}/${br[3]}`;
+  const d = new Date(valor);
+  return isNaN(d.getTime()) ? "" : d.toLocaleDateString("pt-BR");
+}
+
+export function isCursoISO(titulo: string) {
+  const t = titulo
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase();
+  return t.includes("politica da qualidade") || t.includes("iso 9001");
+}
 
 interface CertificadoData {
   id: number;
@@ -79,15 +97,24 @@ export function CertificadoModal({ certificado, onClose }: CertificadoModalProps
           <i className="fa-solid fa-xmark" />
         </button>
 
-        <CertificadoISO
-          participante={certificado.aluno_nome}
-          curso={certificado.curso_titulo}
-          cargaHoraria={certificado.curso_duracao || "2h"}
-          dataEmissao={new Date(certificado.emitido_em).toLocaleDateString("pt-BR")}
-          {...(certificado.curso_descricao || certificado.curso_modulos
-            ? { temas: certificado.curso_descricao || certificado.curso_modulos || "" }
-            : {})}
-        />
+        {isCursoISO(certificado.curso_titulo) ? (
+          <CertificadoISO
+            participante={certificado.aluno_nome}
+            curso={certificado.curso_titulo}
+            cargaHoraria={certificado.curso_duracao || "2h"}
+            dataEmissao={formatarData(certificado.emitido_em)}
+            {...(certificado.curso_descricao || certificado.curso_modulos
+              ? { temas: certificado.curso_descricao || certificado.curso_modulos || "" }
+              : {})}
+          />
+        ) : (
+          <CertificadoPadrao
+            participante={certificado.aluno_nome}
+            curso={certificado.curso_titulo}
+            dataEmissao={formatarData(certificado.emitido_em)}
+            codigo={certificado.codigo}
+          />
+        )}
       </div>
     </div>
   );

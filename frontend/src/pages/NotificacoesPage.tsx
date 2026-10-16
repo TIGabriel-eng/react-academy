@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ApiService } from '../services/api';
 import type { Notificacao } from '../types';
+import { formatarData } from '../components/CertificadoModal';
 
 export function NotificacoesPage() {
   const [notificacoes, setNotificacoes] = useState<Notificacao[]>([]);
@@ -37,7 +38,7 @@ export function NotificacoesPage() {
   const getIcon = (tipo: string) => {
     switch (tipo) {
       case 'boas_vindas': return 'fa-solid fa-hand-wave';
-      case 'curso_concluido': return 'fa-solid fa-certificate';
+      case 'curso_concluido': return 'fa-solid fa-award';
       case 'evento': return 'fa-regular fa-calendar-check';
       default: return 'fa-regular fa-bell';
     }
@@ -135,7 +136,7 @@ export function NotificacoesPage() {
                     )}
                   </div>
                   <span style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', whiteSpace: 'nowrap' }}>
-                    {new Date(n.created_at).toLocaleDateString('pt-BR')}
+                    {formatarData(n.created_at)}
                   </span>
                 </div>
                 <p style={{ margin: '4px 0 0', fontSize: '0.85rem', color: 'var(--color-text-secondary)', lineHeight: 1.5 }}>

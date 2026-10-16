@@ -982,6 +982,12 @@ ul { list-style: none; }
   height: 100%;
   object-fit: cover;
 }
+/* Miniatura de certificado: imagens mantêm as proporções originais */
+.curso-card__image .cert-preview img {
+  width: auto;
+  height: auto;
+  object-fit: fill;
+}
 
 .curso-card__status {
   position: absolute;

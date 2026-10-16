@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ApiService } from '../services/api';
-import { CertificadoModal } from '../components/CertificadoModal';
+import { CertificadoModal, formatarData } from '../components/CertificadoModal';
+import { CertificadoPreview } from '../components/CertificadoPreview';
 
 interface Certificado {
   id: number;
@@ -45,14 +46,22 @@ export function CertificadosPage() {
         <div className="cursos-grid">
           {certificados.map((cert) => (
             <div key={cert.id} className="curso-card">
-              <div className="curso-card__image" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, rgba(245,158,11,0.15), rgba(37,99,235,0.1))' }}>
-                <i className="fa-solid fa-certificate" style={{ fontSize: '3rem', color: '#f59e0b' }}></i>
+              <div className="curso-card__image" style={{ background: '#e9ecf3' }}>
+                <CertificadoPreview
+                  alunoNome={cert.aluno_nome}
+                  cursoTitulo={cert.curso_titulo}
+                  emitidoEm={cert.emitido_em}
+                  codigo={cert.codigo}
+                  cursoDescricao={cert.curso_descricao}
+                  cursoModulos={cert.curso_modulos}
+                  cursoDuracao={cert.curso_duracao}
+                />
                 <span className="curso-card__status" style={{ background: 'rgba(245,158,11,0.85)', color: '#fff' }}>Certificado</span>
               </div>
               <div className="curso-card__name">{cert.curso_titulo}</div>
               <div className="curso-card__divider"></div>
               <div className="curso-card__meta" style={{ justifyContent: 'space-between' }}>
-                <span><i className="fa-solid fa-calendar"></i> {new Date(cert.emitido_em).toLocaleDateString('pt-BR')}</span>
+                <span><i className="fa-solid fa-calendar"></i> {formatarData(cert.emitido_em)}</span>
                 <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
                   <button
                     onClick={(e) => { e.stopPropagation(); setSelectedCert(cert); }}
