@@ -343,8 +343,8 @@ export function AmbientePage() {
         <div className="stat-item">
           <i className="fa-solid fa-star"></i>
           <div>
-            <span className="stat-item__number" data-target={metricas?.satisfacao_alunos || 0}>0</span><span>%</span>
-            <p>Satisfação dos alunos</p>
+            <span className="stat-item__number" data-target={metricas?.taxa_conclusao || 0}>0</span><span>%</span>
+            <p>Taxa de conclusão</p>
           </div>
         </div>
       </section>

@@ -216,6 +216,7 @@ export function VideoAreaPage() {
   useEffect(() => {
     window.scrollTo(0, 0);
     if (!cursoSlug) return;
+    ApiService.registrarAcessoCurso(cursoSlug).catch(() => {});
     setLoading(true);
     setError(null);
 

@@ -13,6 +13,17 @@ export function parseEventoData(data: string): Date | null {
   return new Date(parseInt(dp[2]), parseInt(dp[1]) - 1, parseInt(dp[0]), parseInt(tp[0]), parseInt(tp[1]));
 }
 
+const DURACAO_PADRAO_MS = 2 * 60 * 60 * 1000;
+
+export function fimEvento(ev: Evento, inicio: Date): Date {
+  const fim = ev.data_fim ? parseEventoData(ev.data_fim) : null;
+  return fim && fim > inicio ? fim : new Date(inicio.getTime() + DURACAO_PADRAO_MS);
+}
+
+export function formatDataHora(d: Date): string {
+  return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+
 export function diasRestantes(d: Date): number {
   const now = new Date();
   const diff = d.getTime() - now.getTime();

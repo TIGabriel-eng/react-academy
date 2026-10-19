@@ -16,6 +16,11 @@ export function CursoPage() {
     }).catch(() => {});
   }, [slug]);
 
+  useEffect(() => {
+    if (!slug) return;
+    ApiService.registrarAcessoCurso(slug).catch(() => {});
+  }, [slug]);
+
   if (!curso) {
     return (
       <div style={{ padding: '24px', textAlign: 'center' }}>

@@ -16,6 +16,7 @@ const CACHEABLE_PATHS = [
   '/api/matriculas/minhas/',
   '/api/notificacoes/',
 ];
+const inflight = new Map<string, Promise<any>>();
 const responseCache = new Map<string, { data: any; expires: number }>();
 
 function cacheKey(method: string, path: string): string {
@@ -78,7 +79,7 @@ function forceLogout() {
   window.location.href = '/login';
 }
 
-async function request(method: string, path: string, body?: any, _retry = false): Promise<any> {
+async function request(method: string, path: string, body?: any, _retry = false, _shared = false): Promise<any> {
   if (typeof API !== 'undefined') {
     if (body !== undefined) {
       return API[method.toLowerCase()]?.(path, body) ?? API.get?.(path);
@@ -94,6 +95,16 @@ async function request(method: string, path: string, body?: any, _retry = false)
 
   const cached = getCache(method, path);
   if (cached !== undefined) return cached;
+
+  // Evita requisições GET idênticas simultâneas (várias telas pedem /api/cursos/ ao mesmo tempo)
+  if (!_shared && isCacheable(method, path)) {
+    const key = cacheKey(method, path);
+    const pending = inflight.get(key);
+    if (pending) return pending;
+    const p = request(method, path, body, _retry, true).finally(() => inflight.delete(key));
+    inflight.set(key, p);
+    return p;
+  }
 
   const res = await fetch(url, options);
 

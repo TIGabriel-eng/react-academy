@@ -111,6 +111,7 @@ export interface Evento {
   id: number;
   titulo?: string;
   data: string;
+  data_fim?: string | null;
   imagem_url?: string;
   descricao?: string;
   url?: string;
@@ -148,7 +149,7 @@ export interface DashboardData {
     cursos_ativos: number;
     total_usuarios: number;
     certificados_emitidos: number;
-    satisfacao_alunos: number;
+    taxa_conclusao: number;
   };
 }
 

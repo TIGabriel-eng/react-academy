@@ -32,6 +32,19 @@ export function Layout() {
     }
   }, [navigate]);
 
+  // Tempo na plataforma: envia um ping a cada minuto enquanto a aba está visível.
+  useEffect(() => {
+    if (!AuthService.isLoggedIn()) return;
+    const enviarPing = () => {
+      if (document.visibilityState === 'visible') {
+        ApiService.registrarPresenca().catch(() => {});
+      }
+    };
+    enviarPing();
+    const intervalo = setInterval(enviarPing, 60_000);
+    return () => clearInterval(intervalo);
+  }, []);
+
   useEffect(() => {
     setSidebarOpen(false);
   }, [location.pathname]);
