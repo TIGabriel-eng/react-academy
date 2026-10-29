@@ -24,6 +24,16 @@ function isPlayableMaterial(m: Material): boolean {
   return !!(m.url_externa || (m.arquivo_url && (!m.modalidade || m.modalidade === 'video')));
 }
 
+function linkify(text: string): React.ReactNode[] {
+  return text.split(/(https?:\/\/[^\s]+)/g).map((part, i) =>
+    /^https?:\/\//.test(part) ? (
+      <a key={i} href={part} target="_blank" rel="noopener noreferrer">{part}</a>
+    ) : (
+      part
+    )
+  );
+}
+
 export function VideoAreaPage() {
   const { cursoSlug } = useParams<{ cursoSlug: string }>();
   const navigate = useNavigate();
@@ -533,7 +543,7 @@ export function VideoAreaPage() {
                   <i className="fa-solid fa-circle-info" />
                   <span>Orientações do Instrutor</span>
                 </div>
-                <p className="va-instructor-notes__text">{activeLesson.material.observacoes}</p>
+                <p className="va-instructor-notes__text">{linkify(activeLesson.material.observacoes)}</p>
               </div>
             )}
 
