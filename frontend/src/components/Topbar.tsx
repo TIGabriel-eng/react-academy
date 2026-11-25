@@ -3,6 +3,7 @@ import { AuthService } from '../services/auth';
 import { PLANO_MAP } from '../types';
 import { ApiService } from '../services/api';
 import { NotificationPanel } from './NotificationPanel';
+import { AVATAR_FALLBACK, handleAvatarError } from '../utils/avatar';
 
 interface TopbarProps {
   onMenuToggle: () => void;
@@ -123,7 +124,7 @@ export function Topbar({ onMenuToggle, onSearchOpen, showSearch, showProfile }: 
         {/* Perfil mobile — aparece quando RightPanel some (telas ≤1023px) */}
         <div className="topbar-profile topbar-profile--mobile" style={{ position: 'relative' }}>
           <div className="topbar-profile__trigger" onClick={() => setProfileOpen(!profileOpen)}>
-            <img src={avatar || '../assets/images/business.png'} alt="Avatar" className="topbar-profile__avatar" onError={(e) => { (e.target as HTMLImageElement).src = '../assets/images/business.png'; }} />
+            <img src={avatar || AVATAR_FALLBACK} alt="Avatar" className="topbar-profile__avatar" onError={handleAvatarError} />
           </div>
           {profileOpen && (
             <div className="profile-dropdown is-visible" style={{ position: 'absolute', top: '100%', right: 0, marginTop: '4px' }} onClick={(e) => e.stopPropagation()}>
@@ -148,7 +149,7 @@ export function Topbar({ onMenuToggle, onSearchOpen, showSearch, showProfile }: 
         {showProfile && (
           <div className="topbar-profile topbar-profile--desktop" style={{ position: 'relative' }}>
             <div className="topbar-profile__trigger" onClick={() => setProfileOpen(!profileOpen)}>
-              <img src={avatar || '../assets/images/business.png'} alt="Avatar" className="topbar-profile__avatar" onError={(e) => { (e.target as HTMLImageElement).src = '../assets/images/business.png'; }} />
+              <img src={avatar || AVATAR_FALLBACK} alt="Avatar" className="topbar-profile__avatar" onError={handleAvatarError} />
               <div className="topbar-profile__details">
                 <span className="progress-sidebar__username">{userName}</span>
                 <span className={`progress-sidebar__plan pill-${role === 'admin' ? 'admin' : role === 'empresario' ? 'empresario' : role === 'visitor' ? 'visitor' : role === 'colaborador_orcoma' ? 'colaborador_orcoma' : 'cliente'}`}>

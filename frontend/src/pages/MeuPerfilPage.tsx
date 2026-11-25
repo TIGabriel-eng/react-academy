@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { AuthService } from '../services/auth';
 import { ApiService } from '../services/api';
+import { AVATAR_FALLBACK, handleAvatarError } from '../utils/avatar';
 
 const PLANO_MAP: Record<string, string> = {
   admin: 'Administrador',
@@ -10,13 +11,6 @@ const PLANO_MAP: Record<string, string> = {
   empresario: 'Empresário',
   visitor: 'Visitante',
 };
-
-function corDoNome(nome: string) {
-  let hash = 0;
-  for (let i = 0; i < nome.length; i++) hash = nome.charCodeAt(i) + ((hash << 5) - hash);
-  const colors = ['#f59e0b', '#3b82f6', '#ef4444', '#10b981', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
-  return colors[Math.abs(hash) % colors.length];
-}
 
 function escapeHtml(str: string) {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -174,7 +168,6 @@ export function MeuPerfilPage() {
 
   const formacaoLabel = formacoes.length > 0 ? formatarNivel(formacoes[0].nivel) + ' em ' + formacoes[0].area : '';
 
-  const initials = profile.nome ? profile.nome.charAt(0).toUpperCase() : '?';
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -313,10 +306,8 @@ export function MeuPerfilPage() {
         {/* LEFT COLUMN — Profile Card */}
         <div className="profile-card">
           <div className="profile-card__avatar-wrap">
-            <div className="profile-card__avatar" style={!profile.avatar_url ? { background: corDoNome(profile.nome || 'U'), color: '#fff' } : undefined}>
-              {profile.avatar_url
-                ? <img src={profile.avatar_url} alt="Avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
-                : initials}
+            <div className="profile-card__avatar">
+              <img src={profile.avatar_url || AVATAR_FALLBACK} alt="Avatar" onError={handleAvatarError} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
             </div>
             <div className="profile-card__avatar-overlay" onClick={() => avatarInputRef.current?.click()}>
               <i className="fa-solid fa-camera"></i>
